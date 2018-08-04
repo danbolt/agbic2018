@@ -28,6 +28,7 @@ Preload.prototype.preload = function() {
 
   // Move these to load later
   this.game.load.spritesheet('test_sheet', 'asset/image/test.png', 32, 32);
+  this.game.load.image('test_sheet_tile', 'asset/image/test.png');
 };
 Preload.prototype.startThreeJS = function () {
   initalizeThreeJS(this.game.renderer.gl);
@@ -44,7 +45,7 @@ Preload.prototype.create = function() {
 
   this.game.scale.onSizeChange.dispatch();
 
-  this.game.state.start('Gameplay');
+  this.game.state.start('Gameplay', true, false, 'floor0');
 };
 
 
@@ -52,7 +53,7 @@ Preload.prototype.create = function() {
 var main = function () {
 	console.log('hello, agbic! 😊');
 
-	var game = new Phaser.Game(480, 640, Phaser.AUTO, undefined, undefined, true, false);
+	var game = new Phaser.Game(240, 320, Phaser.AUTO, undefined, undefined, true, false);
 	game.state.add('Preload', Preload, false);
   game.state.add('Gameplay', Gameplay, false);
 
