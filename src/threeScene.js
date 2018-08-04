@@ -25,6 +25,8 @@ var threeCanvas = undefined;
 		var cube = new THREE.Mesh( geometry, material );
 		scene.add( cube );
 
+		scene.background = new THREE.Color( 'black' );
+
 		camera.position.z = 5;
 	};
 
