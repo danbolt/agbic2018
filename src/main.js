@@ -29,7 +29,21 @@ Preload.prototype.preload = function() {
   // Move these to load later
   this.game.load.spritesheet('test_sheet', 'asset/image/test.png', 32, 32);
 };
+Preload.prototype.startThreeJS = function () {
+  initalizeThreeJS(this.game.renderer.gl);
+};
 Preload.prototype.create = function() {
+  this.game.scale.onSizeChange.add(function () {
+    var cv = this.game.canvas;
+    this.game.canvas = threeCanvas;
+    this.game.scale.reflowCanvas();
+    this.game.canvas = cv;
+  }, this);
+
+  this.startThreeJS();
+
+  this.game.scale.onSizeChange.dispatch();
+
   this.game.state.start('Gameplay');
 };
 
@@ -38,7 +52,7 @@ Preload.prototype.create = function() {
 var main = function () {
 	console.log('hello, agbic! 😊');
 
-	var game = new Phaser.Game(640, 480);
+	var game = new Phaser.Game(480, 640, Phaser.AUTO, undefined, undefined, true, false);
 	game.state.add('Preload', Preload, false);
   game.state.add('Gameplay', Gameplay, false);
 
