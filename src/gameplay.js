@@ -1,7 +1,7 @@
 var ControlsSettings = {
-  xSensitivity: 0.01,
-  ySensitivity: 1
-}
+  mouseXSensitivity: 0.01,
+  keyboardXSensitivity: 0.001
+};
 
 var PlayerWalkSpeed = 50;
 
@@ -21,6 +21,8 @@ Gameplay.prototype.preload = function () {
 Gameplay.prototype.create = function() {
   this.player = this.game.add.sprite(32, 32, 'test_sheet', 0);
   this.player.data.gameState = this;
+  this.player.width = 12;
+  this.player.height = 12;
   this.player.renderable = false;
   this.player.update = function () {
     if (this.game.input.keyboard.isDown(Phaser.KeyCode.W)) {
@@ -34,13 +36,19 @@ Gameplay.prototype.create = function() {
     } else {
       this.body.velocity.set(0, 0);
     }
+
+    if (this.game.input.keyboard.isDown(Phaser.KeyCode.E)) {
+      this.data.gameState.rotationY += this.game.time.elapsed * ControlsSettings.keyboardXSensitivity;
+    } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.Q)) {
+      this.data.gameState.rotationY -= this.game.time.elapsed * ControlsSettings.keyboardXSensitivity;
+    }
   };
   this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
 
   this.rotationY = 0;
   this.game.input.addMoveCallback(function (pointer, x, y, isClickEvent, domMoveEvent) {
     if (pointer.isDown) {
-      var deltaX = domMoveEvent.movementX * ControlsSettings.xSensitivity;
+      var deltaX = domMoveEvent.movementX * ControlsSettings.mouseXSensitivity;
 
       this.rotationY += deltaX;
     }
