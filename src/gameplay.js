@@ -10,6 +10,8 @@ var Gameplay = function () {
   this.player = null;
   this.foreground = null;
 
+  this.ui = null;
+
   this.rotationY = 0;
 };
 Gameplay.prototype.init = function (mapKey) {
@@ -62,6 +64,37 @@ Gameplay.prototype.create = function() {
   map.setCollisionByExclusion([0], true, this.foreground);
   this.game.physics.enable(this.foreground, Phaser.Physics.ARCADE);
 
+  this.ui = this.game.add.group();
+  this.ui.fixedToCamera = true;
+  var buttons = this.game.add.group();
+  this.ui.addChild(buttons);
+  ['items', 'interact', 'logbook'].forEach(function (name, index) {
+    var newButton = this.game.add.button(index * (this.game.width / 3), this.game.height - 64 + 10, 'test_sheet', function () {
+      console.log(name + ' callback');
+    }, this, 16, 17, 28);
+    newButton.width = this.game.width / 3;
+    newButton.height = 64;
+    buttons.addChild(newButton);
+
+    newButton.onInputOver.add(function () {
+      var t = this.game.add.tween(newButton);
+      t.to( { y: (this.game.height - 64) }, 200, Phaser.Easing.Cubic.Out );
+      t.start();
+    }, this);
+    newButton.onInputOut.add(function () {
+      var t = this.game.add.tween(newButton);
+      t.to( { y: (this.game.height - 64 + 10) }, 200, Phaser.Easing.Cubic.In );
+      t.start();
+    }, this);
+
+    var text = this.game.add.bitmapText(16, 12, 'font', name, 8);
+    text.scale.x = 1 / newButton.scale.x;
+    text.scale.y = 1 / newButton.scale.y;
+    text.align = 'center';
+    text.anchor.x = 0.5;
+    newButton.addChild(text);
+  }, this);
+
   populateThreeTestScene(this.game.cache.getTilemapData('level_map').data);
 };
 Gameplay.prototype.update = function() {
@@ -75,6 +108,8 @@ Gameplay.prototype.shutdown = function() {
   this.mapKey = null;
   this.player = null;
   this.foreground = null;
+
+  this.ui = null;
 
   this.rotationY = 0;
 };
