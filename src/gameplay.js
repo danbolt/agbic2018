@@ -64,6 +64,28 @@ Gameplay.prototype.create = function() {
   map.setCollisionByExclusion([0], true, this.foreground);
   this.game.physics.enable(this.foreground, Phaser.Physics.ARCADE);
 
+  this.setupUI();
+
+  populateThreeTestScene(this.game.cache.getTilemapData('level_map').data);
+};
+Gameplay.prototype.update = function() {
+  this.game.physics.arcade.collide(this.player, this.foreground);
+
+	renderThreeScene(this.player.centerX, this.player.centerY, this.rotationY);
+};
+Gameplay.prototype.shutdown = function() {
+  this.game.cache.removeTilemap('level_map');
+
+  this.mapKey = null;
+  this.player = null;
+  this.foreground = null;
+
+  this.ui = null;
+
+  this.rotationY = 0;
+};
+
+Gameplay.prototype.setupUI = function () {
   this.ui = this.game.add.group();
   this.ui.fixedToCamera = true;
   var buttons = this.game.add.group();
@@ -94,22 +116,4 @@ Gameplay.prototype.create = function() {
     text.anchor.x = 0.5;
     newButton.addChild(text);
   }, this);
-
-  populateThreeTestScene(this.game.cache.getTilemapData('level_map').data);
-};
-Gameplay.prototype.update = function() {
-  this.game.physics.arcade.collide(this.player, this.foreground);
-
-	renderThreeScene(this.player.centerX, this.player.centerY, this.rotationY);
-};
-Gameplay.prototype.shutdown = function() {
-  this.game.cache.removeTilemap('level_map');
-
-  this.mapKey = null;
-  this.player = null;
-  this.foreground = null;
-
-  this.ui = null;
-
-  this.rotationY = 0;
 };

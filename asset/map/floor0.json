@@ -33,8 +33,29 @@
          "width":20,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "name":"monsters",
+         "objects":[
+                {
+                 "height":26.4410364886303,
+                 "id":1,
+                 "name":"Chris",
+                 "rotation":0,
+                 "type":"Whiny",
+                 "visible":true,
+                 "width":31.7292437863564,
+                 "x":100.475938656795,
+                 "y":195.663670015865
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextobjectid":1,
+ "nextobjectid":2,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.1.6",

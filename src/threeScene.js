@@ -26,9 +26,15 @@ var threeCanvas = undefined;
 		var floorMaterial = new THREE.MeshBasicMaterial( { color: 0x313233 } );
 		var ceilingMaterial = new THREE.MeshBasicMaterial( { color: 0x444444 } );
 
+		
+
 		scene.background = new THREE.Color( 0x111133 );
 
 		tilemapData.layers.forEach(function (layer) {
+			if (layer.name === 'monsters') {
+				return;
+			}
+
 			var material = floorMaterial;
 			var testMaterialMap = {
 				walls: wallMaterial,
