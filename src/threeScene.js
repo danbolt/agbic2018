@@ -11,7 +11,7 @@ var threeCanvas = undefined;
 
 	initalizeThreeJS = function (phaserWebGLContext) {
 		scene = new THREE.Scene();
-		camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		camera = new THREE.PerspectiveCamera( 55, window.innerWidth / window.innerHeight, 0.1, 600 );
 
 		renderer = new THREE.WebGLRenderer();
 		renderer.setSize(phaserWebGLContext.drawingBufferWidth, phaserWebGLContext.drawingBufferHeight );
@@ -22,9 +22,9 @@ var threeCanvas = undefined;
 
 	populateThreeTestScene = function (tilemapData) {
 		var geometry = new THREE.BoxBufferGeometry( 32, 32, 32 );
-		var wallMaterial = new THREE.MeshBasicMaterial( { color: 0x5555ff } );
+		var wallMaterial = new THREE.MeshBasicMaterial( { color: 0x5555aa } );
 		var floorMaterial = new THREE.MeshBasicMaterial( { color: 0x313233 } );
-		var ceilingMaterial = new THREE.MeshBasicMaterial( { color: 0x133333 } );
+		var ceilingMaterial = new THREE.MeshBasicMaterial( { color: 0x444444 } );
 
 		scene.background = new THREE.Color( 0x111133 );
 
@@ -58,6 +58,8 @@ var threeCanvas = undefined;
 			}, this);
 
 		}, this);
+
+		scene.fog = new THREE.Fog( new THREE.Color( 0x39414f ), 5, 250 );
 
 		camera.position.z = 5;
 		camera.position.x = 3;

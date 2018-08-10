@@ -19,7 +19,7 @@ Gameplay.prototype.preload = function () {
   this.game.load.tilemap('level_map', 'asset/map/' + this.mapKey + '.json', undefined, Phaser.Tilemap.TILED_JSON);
 };
 Gameplay.prototype.create = function() {
-  this.player = this.game.add.sprite(0, 0, 'test_sheet', 0);
+  this.player = this.game.add.sprite(32, 32, 'test_sheet', 0);
   this.player.data.gameState = this;
   this.player.renderable = false;
   this.player.update = function () {
