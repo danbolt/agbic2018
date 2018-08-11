@@ -57,13 +57,6 @@ Gameplay.prototype.create = function() {
     }
   }, this);
 
-  this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR).onDown.add(function () {
-    var monsterInFront = this.isMonsterInFrontOfPlayer();
-    if (monsterInFront !== null) {
-      console.log(monsterInFront.data.name);
-    }
-  }, this);
-
   var map = this.game.add.tilemap('level_map');
   map.addTilesetImage('test', 'test_sheet_tile');
   this.foreground = map.createLayer('walls');
@@ -120,14 +113,14 @@ Gameplay.prototype.isMonsterInFrontOfPlayer = function() {
   var rotation = this.rotationY;
   var monstersInFront = this.monsters.filter(function (monster) {
     // Are we near the monster? (be bold, young one!)
-    if (player.position.distance(monster.position) > 48) {
+    if (player.position.distance(monster.position) > 64) {
       return false;
     }
 
     // Are we looking in the monster's direction? (eye contact is important!)
     var angleToMonster = Phaser.Math.normalizeAngle(Phaser.Point.angle(monster.position, player.position));
     var playerAngle = Phaser.Math.normalizeAngle(rotation);
-    if (Phaser.Math.getShortestAngle(angleToMonster - Math.PI, playerAngle - Math.PI) > (Math.PI * 0.25)) {
+    if (Phaser.Math.getShortestAngle(angleToMonster - Math.PI, playerAngle - Math.PI) > (Math.PI * 0.15)) {
       return false;
     }
 
@@ -145,16 +138,31 @@ Gameplay.prototype.setupUI = function () {
   var text = this.game.add.bitmapText(this.game.width * 0.5, this.game.height * 0.65, 'font', 'here is some dialogue\non multiple lines\nk?', 8);
   text.align = 'center';
   text.anchor.x = 0.5;
-  text.visible = false;
   dialogue.addChild(text);
   this.ui.addChild(dialogue);
+  dialogue.visible = false;
 
+  var callbacks = {
+    "items": function () {},
+    "interact": function () {
+      var monsterInFront = this.isMonsterInFrontOfPlayer();
+      if (monsterInFront !== null) {
+        this.player.body.enable = false;
+        dialogue.visible = true;
+        text.text = ("Hello my name is " + monsterInFront.data.name);
+
+        this.game.time.events.add(1500, function () {
+          this.player.body.enable = true;
+          dialogue.visible = false;
+        }, this);
+      } 
+    },
+    "logbook": function () {}
+  };
   var buttons = this.game.add.group();
   this.ui.addChild(buttons);
   ['items', 'interact', 'logbook'].forEach(function (name, index) {
-    var newButton = this.game.add.button(index * (this.game.width / 3), this.game.height - 64 + 10, 'test_sheet', function () {
-      console.log(name + ' callback');
-    }, this, 16, 17, 28);
+    var newButton = this.game.add.button(index * (this.game.width / 3), this.game.height - 64 + 10, 'test_sheet', callbacks[name], this, 16, 17, 28);
     newButton.width = this.game.width / 3;
     newButton.height = 64;
     buttons.addChild(newButton);
