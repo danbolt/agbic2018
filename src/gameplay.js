@@ -40,17 +40,19 @@ Gameplay.prototype.create = function() {
       this.body.velocity.set(0, 0);
     }
 
-    if (this.game.input.keyboard.isDown(Phaser.KeyCode.E)) {
-      this.data.gameState.rotationY += this.game.time.elapsed * ControlsSettings.keyboardXSensitivity;
-    } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.Q)) {
-      this.data.gameState.rotationY -= this.game.time.elapsed * ControlsSettings.keyboardXSensitivity;
+    if (this.body.enable) {
+      if (this.game.input.keyboard.isDown(Phaser.KeyCode.E)) {
+        this.data.gameState.rotationY += this.game.time.elapsed * ControlsSettings.keyboardXSensitivity;
+      } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.Q)) {
+        this.data.gameState.rotationY -= this.game.time.elapsed * ControlsSettings.keyboardXSensitivity;
+      }
     }
   };
   this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
 
   this.rotationY = 0;
   this.game.input.addMoveCallback(function (pointer, x, y, isClickEvent, domMoveEvent) {
-    if (pointer.isDown) {
+    if (pointer.isDown && this.player.body.enable) {
       var deltaX = domMoveEvent.movementX * ControlsSettings.mouseXSensitivity;
 
       this.rotationY += deltaX;
@@ -113,7 +115,7 @@ Gameplay.prototype.isMonsterInFrontOfPlayer = function() {
   var rotation = this.rotationY;
   var monstersInFront = this.monsters.filter(function (monster) {
     // Are we near the monster? (be bold, young one!)
-    if (player.position.distance(monster.position) > 64) {
+    if (player.position.distance(monster.position) > 50) {
       return false;
     }
 
