@@ -32,6 +32,7 @@ Preload.prototype.preload = function() {
 };
 Preload.prototype.startThreeJS = function () {
   initalizeThreeJS(this.game.renderer.gl);
+  loadThreeJSAssets();
 };
 Preload.prototype.create = function() {
   this.game.scale.onSizeChange.add(function () {
@@ -44,9 +45,12 @@ Preload.prototype.create = function() {
   this.startThreeJS();
 
   this.game.scale.onSizeChange.dispatch();
-
-  this.game.state.start('Gameplay', true, false, 'floor0');
 };
+Preload.prototype.update = function () {
+  if (threeAssetsLoaded === true) {
+    this.game.state.start('Gameplay', true, false, 'floor0');
+  }
+}
 
 
 

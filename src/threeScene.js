@@ -1,13 +1,17 @@
 var initalizeThreeJS = undefined;
+var loadThreeJSAssets = undefined;
 var populateThreeTestScene = undefined;
 var renderThreeScene = undefined;
 
 var threeCanvas = undefined;
+var threeAssetsLoaded = false;
 
 (function () {
 	var scene = undefined;
 	var camera = undefined;
 	var renderer = undefined;
+
+	var assetsMap = {};
 
 	initalizeThreeJS = function (phaserWebGLContext) {
 		scene = new THREE.Scene();
@@ -20,18 +24,63 @@ var threeCanvas = undefined;
 		threeCanvas = renderer.domElement;
 	};
 
-	populateThreeTestScene = function (tilemapData) {
-		var geometry = new THREE.BoxBufferGeometry( 32, 32, 32 );
-		var wallMaterial = new THREE.MeshBasicMaterial( { color: 0x5555aa } );
-		var floorMaterial = new THREE.MeshBasicMaterial( { color: 0x313233 } );
-		var ceilingMaterial = new THREE.MeshBasicMaterial( { color: 0x444444 } );
+	loadThreeJSAssets = function () {
+		var assetsToLoad = [
+			'test'
+		];
+		var assetsFinishedLoading = 0;
 
-		
+  		var tl = new THREE.TextureLoader();
+
+  		assetsToLoad.forEach(function (assetName) {
+  			tl.load('asset/image/' + assetName + '.png', function (loadedTexture) {
+  				assetsMap[assetName] = loadedTexture;
+
+  				assetsFinishedLoading++;
+  				if (assetsFinishedLoading === assetsToLoad.length) {
+  					threeAssetsLoaded = true;
+  					console.log('done loading three assets!');
+  				}
+  			});
+  		}, this);
+	};
+
+	populateThreeTestScene = function (tilemapData) {
+
+		var wallsTexture = assetsMap['test'].clone();
+        wallsTexture.needsUpdate = true;
+        wallsTexture.magFilter = THREE.NearestFilter;
+        wallsTexture.minFilter = THREE.NearestFilter;
+        wallsTexture.wrapS = THREE.RepeatWrapping;
+        wallsTexture.wrapT = THREE.RepeatWrapping;
+        wallsTexture.repeat.set(32 / wallsTexture.image.width, 32 / wallsTexture.image.height);
+        wallsTexture.offset.x = 0;
+        wallsTexture.offset.y = 0.5;
+
+        var monsterTexture = assetsMap['test'].clone();
+        monsterTexture.needsUpdate = true;
+        monsterTexture.magFilter = THREE.NearestFilter;
+        monsterTexture.minFilter = THREE.NearestFilter;
+        monsterTexture.wrapS = THREE.RepeatWrapping;
+        monsterTexture.wrapT = THREE.RepeatWrapping;
+        monsterTexture.repeat.set(32 / monsterTexture.image.width, 32 / monsterTexture.image.height);
+        monsterTexture.offset.x = 0;
+        monsterTexture.offset.y = 1 - (1/8);
+
+		var geometry = new THREE.BoxBufferGeometry( 32, 32, 32 );
+		var wallMaterial = new THREE.MeshBasicMaterial( { map: wallsTexture } );
+		var floorMaterial = new THREE.MeshBasicMaterial( { color: 0x313233, map: wallsTexture} );
+		var ceilingMaterial = new THREE.MeshBasicMaterial( { color: 0x333344, map: wallsTexture } );
 
 		scene.background = new THREE.Color( 0x111133 );
 
 		tilemapData.layers.forEach(function (layer) {
 			if (layer.name === 'monsters') {
+
+				layer.objects.forEach(function (object) {
+					//
+				}, this);
+
 				return;
 			}
 
