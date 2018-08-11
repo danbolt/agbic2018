@@ -15,7 +15,7 @@ var threeAssetsLoaded = false;
 
 	initalizeThreeJS = function (phaserWebGLContext) {
 		scene = new THREE.Scene();
-		camera = new THREE.PerspectiveCamera( 55, window.innerWidth / window.innerHeight, 0.1, 600 );
+		camera = new THREE.PerspectiveCamera( 75, 240 / 320, 0.1, 600 );
 
 		renderer = new THREE.WebGLRenderer();
 		renderer.setSize(phaserWebGLContext.drawingBufferWidth, phaserWebGLContext.drawingBufferHeight );
@@ -45,7 +45,7 @@ var threeAssetsLoaded = false;
   		}, this);
 	};
 
-	populateThreeTestScene = function (tilemapData) {
+	populateThreeTestScene = function (tilemapData, monsters) {
 
 		var wallsTexture = assetsMap['test'].clone();
         wallsTexture.needsUpdate = true;
@@ -66,6 +66,7 @@ var threeAssetsLoaded = false;
         monsterTexture.repeat.set(32 / monsterTexture.image.width, 32 / monsterTexture.image.height);
         monsterTexture.offset.x = 0;
         monsterTexture.offset.y = 1 - (1/8);
+        var monsterMaterial = new THREE.SpriteMaterial( { map: monsterTexture, fog: true } );
 
 		var geometry = new THREE.BoxBufferGeometry( 32, 32, 32 );
 		var wallMaterial = new THREE.MeshBasicMaterial( { map: wallsTexture } );
@@ -76,11 +77,6 @@ var threeAssetsLoaded = false;
 
 		tilemapData.layers.forEach(function (layer) {
 			if (layer.name === 'monsters') {
-
-				layer.objects.forEach(function (object) {
-					//
-				}, this);
-
 				return;
 			}
 
@@ -112,6 +108,13 @@ var threeAssetsLoaded = false;
 				scene.add( cube );
 			}, this);
 
+		}, this);
+
+		monsters.forEach(function (monster) {
+			var sprite = new THREE.Sprite(monsterMaterial);
+			sprite.position.set(monster.x, 0, monster.y);
+			sprite.scale.set(32, 32, 32);
+			scene.add(sprite);
 		}, this);
 
 		scene.fog = new THREE.Fog( new THREE.Color( 0x39414f ), 5, 250 );

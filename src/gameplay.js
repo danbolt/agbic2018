@@ -9,6 +9,7 @@ var Gameplay = function () {
   this.mapKey = null;
   this.player = null;
   this.foreground = null;
+  this.monsters = null;
 
   this.ui = null;
 
@@ -64,12 +65,32 @@ Gameplay.prototype.create = function() {
   map.setCollisionByExclusion([0], true, this.foreground);
   this.game.physics.enable(this.foreground, Phaser.Physics.ARCADE);
 
+  this.monsters = this.game.add.group();
+  if (map.objects.monsters) {
+    map.objects.monsters.forEach(function (monster) {
+      var newMonster = this.game.add.sprite(monster.x, monster.y, 'test_sheet', 0);
+      newMonster.anchor.set(0.5, 0.5);
+      newMonster.tint = 0xff0000;
+      newMonster.width = 16;
+      newMonster.height = 16;
+      newMonster.renderable = false;
+      this.game.physics.enable(newMonster, Phaser.Physics.ARCADE);
+      newMonster.body.immovable = true;
+      newMonster.body.kinematic = true;
+
+      this.monsters.addChild(newMonster);
+      this.monsters.addToHash(newMonster);
+    }, this);
+  }
+
   this.setupUI();
 
-  populateThreeTestScene(this.game.cache.getTilemapData('level_map').data);
+  populateThreeTestScene(this.game.cache.getTilemapData('level_map').data, this.monsters.children);
 };
 Gameplay.prototype.update = function() {
   this.game.physics.arcade.collide(this.player, this.foreground);
+
+  this.game.physics.arcade.collide(this.player, this.monsters);
 
 	renderThreeScene(this.player.centerX, this.player.centerY, this.rotationY);
 };
@@ -79,6 +100,7 @@ Gameplay.prototype.shutdown = function() {
   this.mapKey = null;
   this.player = null;
   this.foreground = null;
+  this.monsters = null;
 
   this.ui = null;
 
