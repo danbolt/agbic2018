@@ -29,6 +29,7 @@ Preload.prototype.preload = function() {
   // Move these to load later
   this.game.load.spritesheet('test_sheet', 'asset/image/test.png', 32, 32);
   this.game.load.image('test_sheet_tile', 'asset/image/test.png');
+  this.game.load.spritesheet('portraits', 'asset/image/portraits.png', 100, 160);
 };
 Preload.prototype.startThreeJS = function () {
   initalizeThreeJS(this.game.renderer.gl);

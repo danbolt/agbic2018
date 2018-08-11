@@ -57,6 +57,13 @@ Gameplay.prototype.create = function() {
     }
   }, this);
 
+  this.game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR).onDown.add(function () {
+    var monsterInFront = this.isMonsterInFrontOfPlayer();
+    if (monsterInFront !== null) {
+      console.log(monsterInFront.data.name);
+    }
+  }, this);
+
   var map = this.game.add.tilemap('level_map');
   map.addTilesetImage('test', 'test_sheet_tile');
   this.foreground = map.createLayer('walls');
@@ -77,6 +84,7 @@ Gameplay.prototype.create = function() {
       this.game.physics.enable(newMonster, Phaser.Physics.ARCADE);
       newMonster.body.immovable = true;
       newMonster.body.kinematic = true;
+      newMonster.data = monster;
 
       this.monsters.addChild(newMonster);
       this.monsters.addToHash(newMonster);
@@ -107,9 +115,40 @@ Gameplay.prototype.shutdown = function() {
   this.rotationY = 0;
 };
 
+Gameplay.prototype.isMonsterInFrontOfPlayer = function() {
+  var player = this.player;
+  var rotation = this.rotationY;
+  var monstersInFront = this.monsters.filter(function (monster) {
+    // Are we near the monster? (be bold, young one!)
+    if (player.position.distance(monster.position) > 48) {
+      return false;
+    }
+
+    // Are we looking in the monster's direction? (eye contact is important!)
+    var angleToMonster = Phaser.Math.normalizeAngle(Phaser.Point.angle(monster.position, player.position));
+    var playerAngle = Phaser.Math.normalizeAngle(rotation);
+    if (Phaser.Math.getShortestAngle(angleToMonster - Math.PI, playerAngle - Math.PI) > (Math.PI * 0.25)) {
+      return false;
+    }
+
+    return true;
+  });
+
+  return monstersInFront.first;
+};
+
 Gameplay.prototype.setupUI = function () {
   this.ui = this.game.add.group();
   this.ui.fixedToCamera = true;
+
+  var dialogue = this.game.add.group();
+  var text = this.game.add.bitmapText(this.game.width * 0.5, this.game.height * 0.65, 'font', 'here is some dialogue\non multiple lines\nk?', 8);
+  text.align = 'center';
+  text.anchor.x = 0.5;
+  text.visible = false;
+  dialogue.addChild(text);
+  this.ui.addChild(dialogue);
+
   var buttons = this.game.add.group();
   this.ui.addChild(buttons);
   ['items', 'interact', 'logbook'].forEach(function (name, index) {
