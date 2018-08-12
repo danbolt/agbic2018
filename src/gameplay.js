@@ -145,23 +145,42 @@ Gameplay.prototype.showDialogue = function (dialogue) {
   this.dialogueUi.visible = true;
 
   this.dialogueText.text = dialogue[0].line;
+  this.dialogueText.children.forEach(function (child) { child.renderable = false; });
+
   var tAlphaIn = this.game.add.tween(this.dialogueBacking);
   tAlphaIn.to({alpha: 0.4}, 300, Phaser.Easing.Linear.None);
   tAlphaIn.start();
 
   var tAlphaOut = this.game.add.tween(this.dialogueBacking);
   tAlphaOut.to({alpha: 0}, 300, Phaser.Easing.Linear.None, false, 0);
+  tAlphaOut.onComplete.add(function () {
+    this.player.body.enable = true;
+    this.dialogueUi.visible = false;
+  }, this);
 
   var t1 = this.game.add.tween(this.dialoguePortrait);
   t1.to({y: (this.game.height - this.dialoguePortrait.height - 64 + 10)}, 300, Phaser.Easing.Cubic.In);
   var t2 = this.game.add.tween(this.dialoguePortrait);
-  t2.to({y: (this.game.height)}, 500, Phaser.Easing.Cubic.Out, false, 2000);
-  t1.chain(t2, tAlphaOut);
+  t2.to({y: (this.game.height)}, 500, Phaser.Easing.Cubic.Out, false, 0);
   t1.start();
+  t1.onComplete.add(function () {
 
-  tAlphaOut.onComplete.add(function () {
-    this.player.body.enable = true;
-    this.dialogueUi.visible = false;
+    var textChildrenToShow = 0;
+    var tickNextChild = function () {
+      this.dialogueText.children[textChildrenToShow].renderable = true;
+      textChildrenToShow++;
+    };
+    var bipTextLoop = this.game.time.events.loop(100, function () {
+      tickNextChild.call(this);
+      if (textChildrenToShow === this.dialogueText.children.length) {
+        this.game.time.events.remove(bipTextLoop);
+
+        this.game.time.events.add(1000, function () {
+          t2.start();
+          tAlphaOut.start();
+        }, this);
+      }
+    }, this);
   }, this);
 };
 Gameplay.prototype.setupUI = function () {
