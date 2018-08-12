@@ -136,7 +136,18 @@ Gameplay.prototype.setupUI = function () {
   this.ui = this.game.add.group();
   this.ui.fixedToCamera = true;
 
+  // dialogue ui element
   var dialogue = this.game.add.group();
+  var backing = this.game.add.sprite(0, 0, 'test_sheet', 2);
+  backing.tint = 0x000000;
+  backing.width = this.game.width;
+  backing.height = this.game.height;
+  backing.alpha = 0;
+  dialogue.addChild(backing);
+  var portrait = this.game.add.sprite(this.game.width * 0.5, this.game.height, 'portraits', 1);
+  portrait.anchor.set(0.5, 0);
+  portrait.scale.set(1.5);
+  dialogue.addChild(portrait);
   var text = this.game.add.bitmapText(this.game.width * 0.5, this.game.height * 0.65, 'font', 'here is some dialogue\non multiple lines\nk?', 8);
   text.align = 'center';
   text.anchor.x = 0.5;
@@ -153,7 +164,21 @@ Gameplay.prototype.setupUI = function () {
         dialogue.visible = true;
         text.text = ("Hello my name is " + monsterInFront.data.name);
 
-        this.game.time.events.add(1500, function () {
+        var tAlphaIn = this.game.add.tween(backing);
+        tAlphaIn.to({alpha: 0.4}, 300, Phaser.Easing.Linear.None);
+        tAlphaIn.start();
+
+        var tAlphaOut = this.game.add.tween(backing);
+        tAlphaOut.to({alpha: 0}, 300, Phaser.Easing.Linear.None, false, 0);
+
+        var t1 = this.game.add.tween(portrait);
+        t1.to({y: (this.game.height - portrait.height)}, 300, Phaser.Easing.Cubic.In);
+        var t2 = this.game.add.tween(portrait);
+        t2.to({y: (this.game.height)}, 500, Phaser.Easing.Cubic.Out, false, 2000);
+        t1.chain(t2, tAlphaOut);
+        t1.start();
+
+        tAlphaOut.onComplete.add(function () {
           this.player.body.enable = true;
           dialogue.visible = false;
         }, this);
