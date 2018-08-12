@@ -12,6 +12,10 @@ var Gameplay = function () {
   this.monsters = null;
 
   this.ui = null;
+  this.dialogueUi = null;
+  this.dialogueText = null;
+  this.dialoguePortrait = null;
+  this.dialogueBacking = null;
 
   this.rotationY = 0;
 };
@@ -106,6 +110,10 @@ Gameplay.prototype.shutdown = function() {
   this.monsters = null;
 
   this.ui = null;
+  this.dialogueUi = null;
+  this.dialogueText = null;
+  this.dialoguePortrait = null;
+  this.dialogueBacking = null;
 
   this.rotationY = 0;
 };
@@ -132,6 +140,30 @@ Gameplay.prototype.isMonsterInFrontOfPlayer = function() {
   return monstersInFront.first;
 };
 
+Gameplay.prototype.showDialogue = function (dialogue) {
+  this.player.body.enable = false;
+  this.dialogueUi.visible = true;
+
+  this.dialogueText.text = dialogue[0].line;
+  var tAlphaIn = this.game.add.tween(this.dialogueBacking);
+  tAlphaIn.to({alpha: 0.4}, 300, Phaser.Easing.Linear.None);
+  tAlphaIn.start();
+
+  var tAlphaOut = this.game.add.tween(this.dialogueBacking);
+  tAlphaOut.to({alpha: 0}, 300, Phaser.Easing.Linear.None, false, 0);
+
+  var t1 = this.game.add.tween(this.dialoguePortrait);
+  t1.to({y: (this.game.height - this.dialoguePortrait.height - 64 + 10)}, 300, Phaser.Easing.Cubic.In);
+  var t2 = this.game.add.tween(this.dialoguePortrait);
+  t2.to({y: (this.game.height)}, 500, Phaser.Easing.Cubic.Out, false, 2000);
+  t1.chain(t2, tAlphaOut);
+  t1.start();
+
+  tAlphaOut.onComplete.add(function () {
+    this.player.body.enable = true;
+    this.dialogueUi.visible = false;
+  }, this);
+};
 Gameplay.prototype.setupUI = function () {
   this.ui = this.game.add.group();
   this.ui.fixedToCamera = true;
@@ -152,36 +184,19 @@ Gameplay.prototype.setupUI = function () {
   text.align = 'center';
   text.anchor.x = 0.5;
   dialogue.addChild(text);
-  this.ui.addChild(dialogue);
   dialogue.visible = false;
+  this.dialogueText = text;
+  this.dialoguePortrait = portrait;
+  this.dialogueBacking = backing;
+  this.dialogueUi = dialogue;
+  this.ui.addChild(dialogue);
 
   var callbacks = {
     "items": function () {},
     "interact": function () {
       var monsterInFront = this.isMonsterInFrontOfPlayer();
       if (monsterInFront !== null) {
-        this.player.body.enable = false;
-        dialogue.visible = true;
-        text.text = ("Hello my name is " + monsterInFront.data.name);
-
-        var tAlphaIn = this.game.add.tween(backing);
-        tAlphaIn.to({alpha: 0.4}, 300, Phaser.Easing.Linear.None);
-        tAlphaIn.start();
-
-        var tAlphaOut = this.game.add.tween(backing);
-        tAlphaOut.to({alpha: 0}, 300, Phaser.Easing.Linear.None, false, 0);
-
-        var t1 = this.game.add.tween(portrait);
-        t1.to({y: (this.game.height - portrait.height)}, 300, Phaser.Easing.Cubic.In);
-        var t2 = this.game.add.tween(portrait);
-        t2.to({y: (this.game.height)}, 500, Phaser.Easing.Cubic.Out, false, 2000);
-        t1.chain(t2, tAlphaOut);
-        t1.start();
-
-        tAlphaOut.onComplete.add(function () {
-          this.player.body.enable = true;
-          dialogue.visible = false;
-        }, this);
+        this.showDialogue(dialogueFor("SampleDialogue"));
       } 
     },
     "logbook": function () {}
