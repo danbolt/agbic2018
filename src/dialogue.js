@@ -1,3 +1,9 @@
+var ErrorDialogue = [
+	{
+		"line": "(dialogue not found)"
+	}
+];
+
 var SampleDialogue = [
 	{
 		"line": "Hello, world, I am here!"
@@ -25,7 +31,7 @@ var SampleChoice = [
 				"result": "SampleGirl"
 			},
 			{
-				"name": "Well...",
+				"name": "Um...",
 				"sideEffect": "was_bold",
 				"result": "SampleNonBinary"
 			}
@@ -59,5 +65,5 @@ var DialogueMap = {
 	"SampleNonBinary": SampleNonBinary,
 };
 var dialogueFor = function (key) {
-	return DialogueMap[key];
+	return DialogueMap[key] ? DialogueMap[key] : ErrorDialogue;
 }

@@ -144,8 +144,70 @@ Gameplay.prototype.showDialogue = function (dialogue) {
   this.player.body.enable = false;
   this.dialogueUi.visible = true;
 
-  this.dialogueText.text = dialogue[0].line;
-  this.dialogueText.children.forEach(function (child) { child.renderable = false; });
+  var currentDialogueIndex = 0;
+
+  var setupDialogue = function () {
+    if (dialogue[currentDialogueIndex].choice) {
+      this.dialogueText.text = dialogue[currentDialogueIndex].choice;
+    } else {
+      this.dialogueText.text = dialogue[currentDialogueIndex].line;
+    }
+    
+    this.dialogueText.children.forEach(function (child) { child.renderable = false; });
+  };
+
+  var playDialogue = function (onComplete, onCompleteContext) {
+    var textChildrenToShow = 0;
+    var tickNextChild = function () {
+      this.dialogueText.children[textChildrenToShow].renderable = true;
+      textChildrenToShow++;
+    };
+    var bipTextLoop = this.game.time.events.loop(60, function () {
+      tickNextChild.call(this);
+      if (textChildrenToShow === this.dialogueText.children.length) {
+        this.game.time.events.remove(bipTextLoop);
+
+        if (dialogue[currentDialogueIndex].choice) {
+          var t = this.game.add.tween(this.dialogueText);
+          t.to( { y: (this.game.height * 0.4) }, 400, Phaser.Easing.Linear.None );
+          t.onComplete.add(function () {
+            var buttons = [];
+            dialogue[currentDialogueIndex].options.forEach(function (option, index) {
+              var newButton = this.game.add.button(this.game.width * 0.5, this.game.height * 0.5 + (32 * index), 'test_sheet', function () {
+                buttons.forEach(function (button) { button.destroy(); }, this);
+              }, this, 16, 17, 28);
+              newButton.anchor.set(0.5);
+              newButton.width = (this.game.width) - 64;
+              newButton.height = 24;
+              var text = this.game.add.bitmapText(0, 0, 'font', option.name, 8);
+              text.scale.x = 1 / newButton.scale.x;
+              text.scale.y = 1 / newButton.scale.y;
+              text.align = 'center';
+              text.anchor.x = 0.5;
+              text.anchor.y = 0.5;
+              newButton.addChild(text);
+              buttons.push(newButton);
+            }, this);
+          }, this);
+          t.start();
+        } else {
+          currentDialogueIndex++;
+          if (currentDialogueIndex === dialogue.length) {
+            this.game.time.events.add(1000, function () {
+              onComplete.call(onCompleteContext);
+            }, this);
+          } else {
+            this.game.time.events.add(1000, function () {
+              setupDialogue.call(this);
+              playDialogue.call(this, onComplete, onCompleteContext);
+            }, this);
+          }
+        }
+      }
+    }, this);
+  };
+
+  setupDialogue.call(this);
 
   var tAlphaIn = this.game.add.tween(this.dialogueBacking);
   tAlphaIn.to({alpha: 0.4}, 300, Phaser.Easing.Linear.None);
@@ -164,22 +226,9 @@ Gameplay.prototype.showDialogue = function (dialogue) {
   t2.to({y: (this.game.height)}, 500, Phaser.Easing.Cubic.Out, false, 0);
   t1.start();
   t1.onComplete.add(function () {
-
-    var textChildrenToShow = 0;
-    var tickNextChild = function () {
-      this.dialogueText.children[textChildrenToShow].renderable = true;
-      textChildrenToShow++;
-    };
-    var bipTextLoop = this.game.time.events.loop(100, function () {
-      tickNextChild.call(this);
-      if (textChildrenToShow === this.dialogueText.children.length) {
-        this.game.time.events.remove(bipTextLoop);
-
-        this.game.time.events.add(1000, function () {
-          t2.start();
-          tAlphaOut.start();
-        }, this);
-      }
+    playDialogue.call(this, function () {
+      t2.start();
+      tAlphaOut.start();
     }, this);
   }, this);
 };
@@ -199,7 +248,7 @@ Gameplay.prototype.setupUI = function () {
   portrait.anchor.set(0.5, 0);
   portrait.scale.set(1.5);
   dialogue.addChild(portrait);
-  var text = this.game.add.bitmapText(this.game.width * 0.5, this.game.height * 0.65, 'font', 'here is some dialogue\non multiple lines\nk?', 8);
+  var text = this.game.add.bitmapText(this.game.width * 0.5, this.game.height * 0.7, 'font', 'here is some dialogue\non multiple lines\nk?', 8);
   text.align = 'center';
   text.anchor.x = 0.5;
   dialogue.addChild(text);
@@ -215,7 +264,7 @@ Gameplay.prototype.setupUI = function () {
     "interact": function () {
       var monsterInFront = this.isMonsterInFrontOfPlayer();
       if (monsterInFront !== null) {
-        this.showDialogue(dialogueFor("SampleDialogue"));
+        this.showDialogue(dialogueFor("SampleChoice"));
       } 
     },
     "logbook": function () {}
