@@ -175,6 +175,16 @@ Gameplay.prototype.showDialogue = function (dialogue) {
             dialogue[currentDialogueIndex].options.forEach(function (option, index) {
               var newButton = this.game.add.button(this.game.width * 0.5, this.game.height * 0.5 + (32 * index), 'test_sheet', function () {
                 buttons.forEach(function (button) { button.destroy(); }, this);
+
+                var t = this.game.add.tween(this.dialogueText);
+                t.to( { y: (this.game.height * 0.7) }, 200, Phaser.Easing.Linear.None );
+                t.onComplete.add(function () {
+                  dialogue = dialogueFor(option.result);
+                  currentDialogueIndex = 0;
+                  setupDialogue.call(this);
+                  playDialogue.call(this, onComplete, onCompleteContext);
+                }, this);
+                t.start();
               }, this, 16, 17, 28);
               newButton.anchor.set(0.5);
               newButton.width = (this.game.width) - 64;
