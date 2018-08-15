@@ -140,6 +140,13 @@ Gameplay.prototype.isMonsterInFrontOfPlayer = function() {
   return monstersInFront.first;
 };
 
+Gameplay.prototype.handleSideEffect = function(sideEffect) {
+  switch (sideEffect) {
+    case "was_bold":
+    //console.log('you were bold!');
+      break;
+  }
+};
 Gameplay.prototype.showDialogue = function (dialogue) {
   this.player.body.enable = false;
   this.dialogueUi.visible = true;
@@ -177,8 +184,9 @@ Gameplay.prototype.showDialogue = function (dialogue) {
                 buttons.forEach(function (button) { button.destroy(); }, this);
 
                 var t = this.game.add.tween(this.dialogueText);
-                t.to( { y: (this.game.height * 0.7) }, 200, Phaser.Easing.Linear.None );
+                t.to( { y: (this.game.height * 0.7) }, 120, Phaser.Easing.Linear.None );
                 t.onComplete.add(function () {
+                  this.handleSideEffect(option.sideEffect);
                   dialogue = dialogueFor(option.result);
                   currentDialogueIndex = 0;
                   setupDialogue.call(this);
