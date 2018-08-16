@@ -54,6 +54,69 @@ var SampleNonBinary = [
 	}
 ];
 
+var ChatChris = [
+	{
+		"line": "I've really gotten into puppies lately."
+	},
+	{
+		"choice": "Swipe left if you don't like puppies.",
+		"options": [
+			{
+				"name": "I love puppies.",
+				"result": "ChrisLike"
+			},
+			{
+				"name": "Ugh, I am not entertaining this.",
+				"result": "ChrisDislike"
+			},
+			{
+				"name": "k",
+				"result": "ChrisWhatever"
+			}
+		]
+	}
+];
+var ChrisLike = [
+	{
+		"line": "I'm glad that superior people like you are around."
+	}
+];
+var ChrisDislike = [
+	{
+		"line": "...what?"
+	},
+	{
+		"line": "How could you be such a monster?"
+	},
+	{
+		"line": "You're emotionally stunted."
+	}
+];
+var ChrisWhatever = [
+	{
+		"line": "ok"
+	}
+];
+
+
+var ChatJedah = [
+	{
+		"line": "I am not Chris."
+	},
+	{
+		"line": "No questions here."
+	}
+];
+
+
+var ChatZain = [
+	{
+		"line": "Wow, you found me!"
+	},
+	{
+		"line": "I'm really hidden away, aren't I?"
+	}
+];
 
 
 /* Access from the game side  */
@@ -63,6 +126,14 @@ var DialogueMap = {
 	"SampleBoy": SampleBoy,
 	"SampleGirl": SampleGirl,
 	"SampleNonBinary": SampleNonBinary,
+
+	"ChatChris": ChatChris,
+	"ChrisLike": ChrisLike,
+	"ChrisDislike": ChrisDislike,
+	"ChrisWhatever": ChrisWhatever,
+
+	"ChatJedah": ChatJedah,
+	"ChatZain": ChatZain
 };
 var dialogueFor = function (key) {
 	return DialogueMap[key] ? DialogueMap[key] : ErrorDialogue;

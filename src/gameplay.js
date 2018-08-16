@@ -193,7 +193,7 @@ Gameplay.prototype.showDialogue = function (dialogue) {
                 buttons.forEach(function (button) { button.destroy(); }, this);
 
                 var t = this.game.add.tween(this.dialogueText);
-                t.to( { y: (this.game.height * 0.7) }, 120, Phaser.Easing.Linear.None );
+                t.to( { y: (this.game.height * 0.6) }, 120, Phaser.Easing.Linear.None );
                 t.onComplete.add(function () {
                   this.handleSideEffect(option.sideEffect);
                   dialogue = dialogueFor(option.result);
@@ -212,6 +212,7 @@ Gameplay.prototype.showDialogue = function (dialogue) {
               text.align = 'center';
               text.anchor.x = 0.5;
               text.anchor.y = 0.5;
+              text.maxWidth = newButton.width;
               newButton.addChild(text);
               buttons.push(newButton);
             }, this);
@@ -298,9 +299,10 @@ Gameplay.prototype.setupUI = function () {
   portrait.anchor.set(0.5, 0);
   portrait.scale.set(1.5);
   dialogue.addChild(portrait);
-  var text = this.game.add.bitmapText(this.game.width * 0.5, this.game.height * 0.7, 'font', 'here is some dialogue\non multiple lines\nk?', 8);
+  var text = this.game.add.bitmapText(this.game.width * 0.5, this.game.height * 0.6, 'font', 'here is some dialogue\non multiple lines\nk?', 8);
   text.align = 'center';
   text.anchor.x = 0.5;
+  text.maxWidth = this.game.width - 32;
   dialogue.addChild(text);
   dialogue.visible = false;
   this.dialogueText = text;
@@ -314,7 +316,7 @@ Gameplay.prototype.setupUI = function () {
     "interact": function () {
       var monsterInFront = this.isMonsterInFrontOfPlayer();
       if (monsterInFront !== null) {
-        this.showDialogue(dialogueFor("SampleChoice"));
+        this.showDialogue(dialogueFor("Chat" + monsterInFront.data.name));
       } 
     },
     "logbook": function () {
@@ -340,11 +342,13 @@ Gameplay.prototype.setupUI = function () {
       t.start();
     }, this);
 
-    var text = this.game.add.bitmapText(16, 12, 'font', name, 8);
+    var text = this.game.add.bitmapText(16, 8, 'font', name, 8);
     text.scale.x = 1 / newButton.scale.x;
     text.scale.y = 1 / newButton.scale.y;
     text.align = 'center';
     text.anchor.x = 0.5;
+    text.anchor.y = 0.5;
+    text.maxWidth = newButton.width;
     newButton.addChild(text);
   }, this);
 
