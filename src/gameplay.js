@@ -1,6 +1,6 @@
 var ControlsSettings = {
   mouseXSensitivity: 0.01,
-  keyboardXSensitivity: 0.001
+  keyboardXSensitivity: 0.004
 };
 
 var PlayerWalkSpeed = 50;
@@ -16,6 +16,8 @@ var Gameplay = function () {
   this.dialogueText = null;
   this.dialoguePortrait = null;
   this.dialogueBacking = null;
+  this.logbookUi = null;
+  this.inventoryUi = null;
 
   this.rotationY = 0;
 };
@@ -32,7 +34,15 @@ Gameplay.prototype.create = function() {
   this.player.height = 12;
   this.player.renderable = false;
   this.player.update = function () {
-    if (this.game.input.keyboard.isDown(Phaser.KeyCode.W)) {
+    if (this.game.input.keyboard.isDown(Phaser.KeyCode.W) || this.game.input.activePointer.isDown) {
+
+      var x = this.game.input.activePointer.x / this.game.width;
+      if (x < 0.3333) {
+        this.data.gameState.rotationY -= ControlsSettings.mouseXSensitivity * 5;
+      } else if (x > 0.666) {
+        this.data.gameState.rotationY += ControlsSettings.mouseXSensitivity * 5;
+      }
+
       this.body.velocity.set(PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY), PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY));
     } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.S)) {
       this.body.velocity.set(-PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY), -PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY));
@@ -55,13 +65,6 @@ Gameplay.prototype.create = function() {
   this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
 
   this.rotationY = 0;
-  this.game.input.addMoveCallback(function (pointer, x, y, isClickEvent, domMoveEvent) {
-    if (pointer.isDown && this.player.body.enable) {
-      var deltaX = domMoveEvent.movementX * ControlsSettings.mouseXSensitivity;
-
-      this.rotationY += deltaX;
-    }
-  }, this);
 
   var map = this.game.add.tilemap('level_map');
   map.addTilesetImage('test', 'test_sheet_tile');
@@ -114,6 +117,8 @@ Gameplay.prototype.shutdown = function() {
   this.dialogueText = null;
   this.dialoguePortrait = null;
   this.dialogueBacking = null;
+  this.logbookUi = null;
+  this.inventoryUi = null;
 
   this.rotationY = 0;
 };
@@ -148,6 +153,10 @@ Gameplay.prototype.handleSideEffect = function(sideEffect) {
   }
 };
 Gameplay.prototype.showDialogue = function (dialogue) {
+  if (this.player.body.enable === false) {
+    return;
+  }
+
   this.player.body.enable = false;
   this.dialogueUi.visible = true;
 
@@ -250,6 +259,29 @@ Gameplay.prototype.showDialogue = function (dialogue) {
     }, this);
   }, this);
 };
+Gameplay.prototype.showLogbook = function () {
+  if (this.player.body.enable === false) {
+    return;
+  }
+
+  this.player.body.enable = false;
+
+  var tMoveIn = this.game.add.tween(this.logbookUi);
+  tMoveIn.to({ x: 8, rotation: [ 0, 0, -0.1, 0 ] }, 700, Phaser.Easing.Elastic.Out);
+  tMoveIn.start();
+};
+Gameplay.prototype.hideLogbook = function () {
+  if (this.logbookUi.x > this.game.width) {
+    return;
+  }
+
+  var moveOut = this.game.add.tween(this.logbookUi);
+  moveOut.to({ x: this.game.width + 8, rotation: [0.1, 0] }, 200, Phaser.Easing.Linear.None);
+  moveOut.onComplete.add(function () {
+    this.player.body.enable = true;
+  }, this);
+  moveOut.start();
+};
 Gameplay.prototype.setupUI = function () {
   this.ui = this.game.add.group();
   this.ui.fixedToCamera = true;
@@ -285,7 +317,9 @@ Gameplay.prototype.setupUI = function () {
         this.showDialogue(dialogueFor("SampleChoice"));
       } 
     },
-    "logbook": function () {}
+    "logbook": function () {
+      this.showLogbook();
+    }
   };
   var buttons = this.game.add.group();
   this.ui.addChild(buttons);
@@ -313,4 +347,42 @@ Gameplay.prototype.setupUI = function () {
     text.anchor.x = 0.5;
     newButton.addChild(text);
   }, this);
+
+  // logbook ui element
+  this.logbookUi = this.game.add.group();
+  var logBacking = this.game.add.sprite(0, 0, 'test_sheet', 13);
+  logBacking.width = this.game.width - 16;
+  logBacking.height = logBacking.width;
+  this.logbookUi.addChild(logBacking);
+  var portrait = this.game.add.sprite(16, 16 + 16, 'test_sheet', 0);
+  portrait.width = 48;
+  portrait.height = 48;
+  this.logbookUi.addChild(portrait);
+  // make this better later
+  var nameText = this.game.add.bitmapText(64 + 8, 24 + 8 + 16, 'font', 'name: dark vessel', 8);
+  nameText.tint = 0x000000;
+  this.logbookUi.addChild(nameText);
+  var typeText = this.game.add.bitmapText(64 + 8, 32 + 8 + 16, 'font', 'type: light', 8);
+  typeText.tint = 0x000000;
+  this.logbookUi.addChild(typeText);
+  var ageText = this.game.add.bitmapText(64 + 8, 40 + 8 + 16, 'font', ' age: 928', 8);
+  ageText.tint = 0x000000;
+  this.logbookUi.addChild(ageText);
+  var signText = this.game.add.bitmapText(64 + 8, 48 + 8 + 16, 'font', 'sign: leo', 8);
+  signText.tint = 0x000000;
+  this.logbookUi.addChild(signText);
+  var descriptionText = this.game.add.bitmapText(16, 72 + 16, 'font', 'hello world my name is daniel. some description written so far. how long can these paragraphs go? Is this okay? ;)', 8);
+  descriptionText.tint = 0x000000;
+  descriptionText.maxWidth = (logBacking.width - 16);
+  this.logbookUi.addChild(descriptionText);
+  var backButton = this.game.add.button(logBacking.width - 64, logBacking.width - 48, 'test_sheet', function () { 
+    this.hideLogbook();
+  }, this, 16, 17, 28);
+  backButton.width = 64;
+  backButton.height = 48;
+  this.logbookUi.addChild(backButton);
+  this.logbookUi.x = 8;
+  this.logbookUi.y = this.game.height - logBacking.height - ((this.game.height - logBacking.height) * 0.5);
+  this.logbookUi.x = this.game.width + 8; //hide offscreen, initially
+  this.ui.addChild(this.logbookUi);
 };
