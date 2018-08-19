@@ -18,6 +18,15 @@ var Gameplay = function () {
   this.dialogueBacking = null;
   this.logbookUi = null;
   this.inventoryUi = null;
+  this.inventory = [];
+  this.currentItemName = null;
+  this.selectInventoryLeftButton = null;
+  this.selectInventoryRightButton = null;
+  this.useSelectedItemButton = null;
+  this.currentItemIndex = -1;
+
+  this.itemsButton = null;
+  this.interactButton = null;
 
   this.rotationY = 0;
 };
@@ -102,6 +111,12 @@ Gameplay.prototype.update = function() {
 
   this.game.physics.arcade.collide(this.player, this.monsters);
 
+  if (this.isMonsterInFrontOfPlayer() !== null) {
+    this.enableInteract();
+  } else {
+    this.disableInteract();
+  }
+
 	renderThreeScene(this.player.centerX, this.player.centerY, this.rotationY);
 };
 Gameplay.prototype.shutdown = function() {
@@ -119,6 +134,12 @@ Gameplay.prototype.shutdown = function() {
   this.dialogueBacking = null;
   this.logbookUi = null;
   this.inventoryUi = null;
+  this.inventory = [];
+  this.currentItemName = null;
+  this.selectInventoryLeftButton = null;
+  this.selectInventoryRightButton = null;
+  this.useSelectedItemButton = null;
+  this.currentItemIndex = -1;
 
   this.rotationY = 0;
 };
@@ -283,6 +304,76 @@ Gameplay.prototype.hideLogbook = function () {
   }, this);
   moveOut.start();
 };
+Gameplay.prototype.showInventory = function () {
+  if (this.player.body.enable === false) {
+    return;
+  }
+
+  this.player.body.enable = false;
+
+  var tMoveIn = this.game.add.tween(this.inventoryUi);
+  tMoveIn.to({ x: 8, rotation: [ 0, 0, -0.1, 0 ] }, 700, Phaser.Easing.Elastic.Out);
+  tMoveIn.start();
+};
+Gameplay.prototype.hideInventory = function () {
+  if (this.inventoryUi.x > this.game.width) {
+    return;
+  }
+
+  var moveOut = this.game.add.tween(this.inventoryUi);
+  moveOut.to({ x: this.game.width + 8, rotation: [0.1, 0] }, 200, Phaser.Easing.Linear.None);
+  moveOut.onComplete.add(function () {
+    this.player.body.enable = true;
+  }, this);
+  moveOut.start();
+};
+Gameplay.prototype.addItemToInventory = function (item) {
+  this.inventory.push(item);
+  if (this.inventory.length === 1) {
+    this.currentItemName.text = item.name;
+    this.enableInventory();
+    this.currentItemIndex = 0;
+  }
+};
+Gameplay.prototype.applyItemOnMonster = function (itemIndex) {
+  if (this.currentItemIndex === -1) {
+    return;
+  }
+
+  var nearbyMonster = this.isMonsterInFrontOfPlayer();
+  if (nearbyMonster === null) {
+    return;
+  }
+
+  var item = this.inventory[this.currentItemIndex];
+  this.inventory.splice(this.inventory.indexOf(item), 1);
+  this.currentItemIndex = 0;
+  this.currentItemName.text = this.inventory[this.currentItemIndex].name;
+
+  if (this.inventory.length === 0) {
+    this.disableInventory();
+    this.currentItemIndex = -1;
+  }
+
+  this.hideInventory();
+  console.log('using ' + item.name + ' on ' + nearbyMonster.name);
+};
+Gameplay.prototype.enableInventory = function () {
+  this.itemsButton.inputEnabled = true;
+  this.itemsButton.children[0].tint = 0xffffff;
+};
+Gameplay.prototype.disableInventory = function () {
+  this.itemsButton.inputEnabled = false;
+  this.itemsButton.children[0].tint = 0x545454;
+};
+Gameplay.prototype.enableInteract = function () {
+  this.interactButton.inputEnabled = true;
+  this.interactButton.children[0].tint = 0xffffff;
+};
+Gameplay.prototype.disableInteract = function () {
+  this.interactButton.inputEnabled = false;
+  this.interactButton.children[0].tint = 0x545454;
+};
 Gameplay.prototype.setupUI = function () {
   this.ui = this.game.add.group();
   this.ui.fixedToCamera = true;
@@ -312,7 +403,9 @@ Gameplay.prototype.setupUI = function () {
   this.ui.addChild(dialogue);
 
   var callbacks = {
-    "items": function () {},
+    "items": function () {
+      this.showInventory();
+    },
     "interact": function () {
       var monsterInFront = this.isMonsterInFrontOfPlayer();
       if (monsterInFront !== null) {
@@ -350,6 +443,12 @@ Gameplay.prototype.setupUI = function () {
     text.anchor.y = 0.5;
     text.maxWidth = newButton.width;
     newButton.addChild(text);
+
+    if (name === 'items') {
+      this.itemsButton = newButton;
+    } else if (name === 'interact') {
+      this.interactButton = newButton;
+    }
   }, this);
 
   // logbook ui element
@@ -389,4 +488,53 @@ Gameplay.prototype.setupUI = function () {
   this.logbookUi.y = this.game.height - logBacking.height - ((this.game.height - logBacking.height) * 0.5);
   this.logbookUi.x = this.game.width + 8; //hide offscreen, initially
   this.ui.addChild(this.logbookUi);
+
+  this.inventoryUi = this.game.add.group();
+  var inventoryBacking = this.game.add.sprite(0, 0, 'test_sheet', 13);
+  inventoryBacking.width = this.game.width - 16;
+  inventoryBacking.height = inventoryBacking.width;
+  this.inventoryUi.addChild(inventoryBacking);
+  var closeInventoryButton = this.game.add.button(inventoryBacking.width - 64, inventoryBacking.width - 48, 'test_sheet', function () { 
+    this.hideInventory();
+  }, this, 16, 17, 28);
+  closeInventoryButton.width = 64;
+  closeInventoryButton.height = 48;
+  this.inventoryUi.addChild(closeInventoryButton);
+  this.inventoryUi.x = 8;
+  this.inventoryUi.y = this.game.height - inventoryBacking.height - ((this.game.height - inventoryBacking.height) * 0.5);
+  this.inventoryUi.x = this.game.width + 8; //hide offscreen, initially
+  this.currentItemName = this.game.add.bitmapText(~~(inventoryBacking.width * 0.5), 24, 'font', 'item name', 8);
+  this.currentItemName.align = 'center';
+  this.currentItemName.anchor.set(0.5);
+  this.currentItemName.tint = 0x000000;
+  this.inventoryUi.addChild(this.currentItemName);
+  this.selectInventoryRightButton = this.game.add.button(inventoryBacking.width, inventoryBacking.height * 0.4, 'test_sheet', function () { 
+    this.currentItemIndex = (this.currentItemIndex + 1) % this.inventory.length;
+    this.currentItemName.text = this.inventory[this.currentItemIndex].name;
+  }, this, 16, 17, 28);
+  this.selectInventoryRightButton.width = 48;
+  this.selectInventoryRightButton.height = 96;
+  this.selectInventoryRightButton.anchor.set(1, 0.5);
+  this.inventoryUi.addChild(this.selectInventoryRightButton);
+  this.selectInventoryLeftButton = this.game.add.button(0, inventoryBacking.height * 0.4, 'test_sheet', function () { 
+    this.currentItemIndex = (this.currentItemIndex + this.inventory.length - 1) % this.inventory.length;
+    this.currentItemName.text = this.inventory[this.currentItemIndex].name;
+  }, this, 16, 17, 28);
+  this.selectInventoryLeftButton.anchor.set(0, 0.5);
+  this.selectInventoryLeftButton.width = 48;
+  this.selectInventoryLeftButton.height = 96;
+  this.inventoryUi.addChild(this.selectInventoryLeftButton);
+  this.useSelectedItemButton = this.game.add.button(inventoryBacking.width * 0.5, inventoryBacking.height * 0.7, 'test_sheet', function () { 
+    this.applyItemOnMonster();
+  }, this, 16, 17, 28);
+  this.useSelectedItemButton.width = 96;
+  this.useSelectedItemButton.height = 32;
+  this.useSelectedItemButton.anchor.set(0.5, 0.5);
+  this.inventoryUi.addChild(this.useSelectedItemButton);
+  this.ui.addChild(this.inventoryUi);
+
+  this.disableInventory();
+  this.addItemToInventory({ name: 'cue ball' });
+  this.addItemToInventory({ name: 'sweater' });
+  this.addItemToInventory({ name: 'tiny robot' });
 };
