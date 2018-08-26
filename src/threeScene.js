@@ -117,6 +117,15 @@ var threeAssetsLoaded = false;
 			scene.add(sprite);
 		}, this);
 
+		items.forEach(function (item) {
+			var sprite = new THREE.Sprite(monsterMaterial);
+			sprite.position.set(item.x, -8, item.y);
+			sprite.scale.set(16, 16, 16);
+			scene.add(sprite);
+			item.data.threeSprite = sprite;
+			console.log(sprite);
+		}, this);
+
 		scene.fog = new THREE.Fog( new THREE.Color( 0x39414f ), 5, 250 );
 
 		camera.position.x = 3;

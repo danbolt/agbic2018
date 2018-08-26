@@ -132,7 +132,7 @@ Gameplay.prototype.create = function() {
 
   this.setupUI();
 
-  populateThreeTestScene(this.game.cache.getTilemapData('level_map').data, this.monsters.children);
+  populateThreeTestScene(this.game.cache.getTilemapData('level_map').data, this.monsters.children, this.items.children);
 };
 Gameplay.prototype.update = function() {
   this.game.physics.arcade.collide(this.player, this.foreground);
@@ -478,6 +478,7 @@ Gameplay.prototype.setupUI = function () {
       if (itemInFront) {
         this.showDialogue([{ "line": "got " + itemInFront.data.name + "!" }]);
         this.addItemToInventory(itemInFront.data);
+        itemInFront.data.threeSprite.parent.remove(itemInFront.data.threeSprite);
         itemInFront.destroy();
         return;
       }
