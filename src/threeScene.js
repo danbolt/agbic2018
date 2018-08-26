@@ -45,7 +45,7 @@ var threeAssetsLoaded = false;
   		}, this);
 	};
 
-	populateThreeTestScene = function (tilemapData, monsters) {
+	populateThreeTestScene = function (tilemapData, monsters, items) {
 
 		var wallsTexture = assetsMap['test'].clone();
         wallsTexture.needsUpdate = true;

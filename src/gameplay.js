@@ -10,6 +10,7 @@ var Gameplay = function () {
   this.player = null;
   this.foreground = null;
   this.monsters = null;
+  this.items = null;
 
   this.ui = null;
   this.dialogueUi = null;
@@ -114,6 +115,21 @@ Gameplay.prototype.create = function() {
     }, this);
   }
 
+  this.items = this.game.add.group();
+  if (map.objects.items) {
+    map.objects.items.forEach(function (item) {
+      var newItem = this.game.add.sprite(item.x, item.y, 'test_sheet', 0);
+      newItem.anchor.set(0.5, 0.5);
+      newItem.tint = 0xff0000;
+      newItem.width = 16;
+      newItem.height = 16;
+      newItem.renderable = false;
+      newItem.data = item;
+
+      this.items.addChild(newItem);
+    }, this);
+  }
+
   this.setupUI();
 
   populateThreeTestScene(this.game.cache.getTilemapData('level_map').data, this.monsters.children);
@@ -123,7 +139,7 @@ Gameplay.prototype.update = function() {
 
   this.game.physics.arcade.collide(this.player, this.monsters);
 
-  if (this.isMonsterInFrontOfPlayer() !== null) {
+  if (this.isMonsterInFrontOfPlayer() !== null || this.isItemInFrontOfPlayer() !== null) {
     this.enableInteract();
   } else {
     this.disableInteract();
@@ -138,6 +154,7 @@ Gameplay.prototype.shutdown = function() {
   this.player = null;
   this.foreground = null;
   this.monsters = null;
+  this.items = null;
 
   this.ui = null;
   this.dialogueUi = null;
@@ -176,6 +193,25 @@ Gameplay.prototype.isMonsterInFrontOfPlayer = function() {
   });
 
   return monstersInFront.first;
+};
+Gameplay.prototype.isItemInFrontOfPlayer = function() {
+  var player = this.player;
+  var rotation = this.rotationY;
+  var itemsInFront = this.items.filter(function (item) {
+    if (player.position.distance(item.position) > 50) {
+      return false;
+    }
+
+    var angleToMonster = Phaser.Math.normalizeAngle(Phaser.Point.angle(item.position, player.position));
+    var playerAngle = Phaser.Math.normalizeAngle(rotation);
+    if (Phaser.Math.getShortestAngle(angleToMonster - Math.PI, playerAngle - Math.PI) > (Math.PI * 0.15)) {
+      return false;
+    }
+
+    return true;
+  });
+
+  return itemsInFront.first;
 };
 
 Gameplay.prototype.handleSideEffect = function(sideEffect) {
@@ -435,7 +471,16 @@ Gameplay.prototype.setupUI = function () {
       var monsterInFront = this.isMonsterInFrontOfPlayer();
       if (monsterInFront !== null) {
         this.showDialogue(dialogueFor("Chat" + monsterInFront.data.name));
-      } 
+        return;
+      }
+
+      var itemInFront = this.isItemInFrontOfPlayer();
+      if (itemInFront) {
+        this.showDialogue([{ "line": "got " + itemInFront.data.name + "!" }]);
+        this.addItemToInventory(itemInFront.data);
+        itemInFront.destroy();
+        return;
+      }
     },
     "logbook": function () {
       this.showLogbook();
