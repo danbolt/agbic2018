@@ -124,9 +124,9 @@ var ChatZain = [
 	}
 ];
 
-var ChrisLoveCueBalls = [
+var ChrisLoveCarrots = [
 	{
-		"line": "Hey, I love cue balls!"
+		"line": "Hey, I love carrots!"
 	}
 ];
 
@@ -143,7 +143,7 @@ var DialogueMap = {
 	"ChrisLike": ChrisLike,
 	"ChrisDislike": ChrisDislike,
 	"ChrisWhatever": ChrisWhatever,
-	"ChrisLoveCueBalls": ChrisLoveCueBalls,
+	"ChrisLoveCarrots": ChrisLoveCarrots,
 
 	"ChatJedah": ChatJedah,
 	"ChatZain": ChatZain

@@ -65,11 +65,11 @@
                  "name":"Chris",
                  "properties":
                     {
-                     "cue ball":"ChrisLoveCueBalls"
+                     "carrot":"ChrisLoveCarrots"
                     },
                  "propertytypes":
                     {
-                     "cue ball":"string"
+                     "carrot":"string"
                     },
                  "rotation":0,
                  "type":"Whiny",

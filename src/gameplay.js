@@ -605,7 +605,4 @@ Gameplay.prototype.setupUI = function () {
   this.ui.addChild(this.inventoryUi);
 
   this.disableInventory();
-  this.addItemToInventory({ name: 'cue ball' });
-  this.addItemToInventory({ name: 'sweater' });
-  this.addItemToInventory({ name: 'tiny robot' });
 };
