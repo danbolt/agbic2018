@@ -4,6 +4,12 @@ var ErrorDialogue = [
 	}
 ];
 
+var DefaultItemMissDialogue = [
+	{
+		"line": "I'm not sure what you want me to do with this."
+	}
+];
+
 var SampleDialogue = [
 	{
 		"line": "Hello, world, I am here!"
@@ -118,6 +124,12 @@ var ChatZain = [
 	}
 ];
 
+var ChrisLoveCueBalls = [
+	{
+		"line": "Hey, I love cue balls!"
+	}
+];
+
 
 /* Access from the game side  */
 var DialogueMap = {
@@ -131,6 +143,7 @@ var DialogueMap = {
 	"ChrisLike": ChrisLike,
 	"ChrisDislike": ChrisDislike,
 	"ChrisWhatever": ChrisWhatever,
+	"ChrisLoveCueBalls": ChrisLoveCueBalls,
 
 	"ChatJedah": ChatJedah,
 	"ChatZain": ChatZain

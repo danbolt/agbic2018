@@ -327,7 +327,7 @@ Gameplay.prototype.showInventory = function () {
   tMoveIn.to({ x: 8, rotation: [ 0, 0, -0.1, 0 ] }, 700, Phaser.Easing.Elastic.Out);
   tMoveIn.start();
 };
-Gameplay.prototype.hideInventory = function () {
+Gameplay.prototype.hideInventory = function (onComplete, onCompleteContext) {
   if (this.inventoryUi.x > this.game.width) {
     return;
   }
@@ -336,6 +336,7 @@ Gameplay.prototype.hideInventory = function () {
   moveOut.to({ x: this.game.width + 8, rotation: [0.1, 0] }, 200, Phaser.Easing.Linear.None);
   moveOut.onComplete.add(function () {
     this.player.body.enable = true;
+    onComplete.call(onCompleteContext);
   }, this);
   moveOut.start();
 };
@@ -347,7 +348,7 @@ Gameplay.prototype.addItemToInventory = function (item) {
     this.currentItemIndex = 0;
   }
 };
-Gameplay.prototype.applyItemOnMonster = function (itemIndex) {
+Gameplay.prototype.applyItemOnMonster = function () {
   if (this.currentItemIndex === -1) {
     return;
   }
@@ -358,17 +359,29 @@ Gameplay.prototype.applyItemOnMonster = function (itemIndex) {
   }
 
   var item = this.inventory[this.currentItemIndex];
-  this.inventory.splice(this.inventory.indexOf(item), 1);
-  this.currentItemIndex = 0;
-  this.currentItemName.text = this.inventory[this.currentItemIndex].name;
 
-  if (this.inventory.length === 0) {
-    this.disableInventory();
-    this.currentItemIndex = -1;
+  var dialogue = dialogueFor(nearbyMonster.data.properties[item.name]);
+  if (dialogue !== ErrorDialogue) {
+    // Remove the current item
+    this.inventory.splice(this.inventory.indexOf(item), 1);
+    this.currentItemIndex = 0;
+    if (this.inventory.length === 0) {
+      this.disableInventory();
+      this.currentItemIndex = -1;
+    } else {
+      this.currentItemName.text = this.inventory[this.currentItemIndex].name;
+    }
+  
+    console.log('using ' + item.name + ' on ' + nearbyMonster.data.name);
+
+    this.hideInventory(function () {
+      this.showDialogue(dialogue);
+    }, this);
+  } else {
+    this.hideInventory(function () {
+      this.showDialogue(DefaultItemMissDialogue);
+    }, this);
   }
-
-  this.hideInventory();
-  console.log('using ' + item.name + ' on ' + nearbyMonster.name);
 };
 Gameplay.prototype.enableInventory = function () {
   this.itemsButton.inputEnabled = true;
@@ -507,7 +520,7 @@ Gameplay.prototype.setupUI = function () {
   inventoryBacking.height = inventoryBacking.width;
   this.inventoryUi.addChild(inventoryBacking);
   var closeInventoryButton = this.game.add.button(inventoryBacking.width - 64, inventoryBacking.width - 48, 'test_sheet', function () { 
-    this.hideInventory();
+    this.hideInventory(function () {}, this);
   }, this, 16, 17, 28);
   closeInventoryButton.width = 64;
   closeInventoryButton.height = 48;

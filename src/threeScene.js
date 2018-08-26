@@ -76,7 +76,7 @@ var threeAssetsLoaded = false;
 		scene.background = new THREE.Color( 0x111133 );
 
 		tilemapData.layers.forEach(function (layer) {
-			if (layer.name === 'monsters') {
+			if (layer.name === 'monsters' || layer.name === 'items') {
 				return;
 			}
 
