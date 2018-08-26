@@ -43,31 +43,43 @@ Gameplay.prototype.create = function() {
   this.player.height = 12;
   this.player.renderable = false;
   this.player.update = function () {
-    if (this.game.input.keyboard.isDown(Phaser.KeyCode.W) || this.game.input.activePointer.isDown) {
-
-      var x = this.game.input.activePointer.x / this.game.width;
-      if (x < 0.3333) {
-        this.data.gameState.rotationY -= ControlsSettings.mouseXSensitivity * 5;
-      } else if (x > 0.666) {
-        this.data.gameState.rotationY += ControlsSettings.mouseXSensitivity * 5;
+    // Touch input
+    if (this.game.input.activePointer.isDown) {
+      if (this.body.enable) {
+        var x = this.game.input.activePointer.x / this.game.width;
+        var y = this.game.input.activePointer.y / this.game.height;
+        if (x < 0.3333) {
+          this.data.gameState.rotationY -= ControlsSettings.mouseXSensitivity * 5;
+        } else if (x > 0.666) {
+          this.data.gameState.rotationY += ControlsSettings.mouseXSensitivity * 5;
+        } else {
+          if (y < 0.75) {
+            this.body.velocity.set(PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY), PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY));
+          } else {
+            this.body.velocity.set(-PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY), -PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY));
+          }
+        }
+      }
+    } else {
+      // Keyboard input
+      if (this.game.input.keyboard.isDown(Phaser.KeyCode.W)) {
+        this.body.velocity.set(PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY), PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY));
+      } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.S)) {
+        this.body.velocity.set(-PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY), -PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY));
+      } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.A)) {
+        this.body.velocity.set(PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY - Math.PI * 0.5), PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY - Math.PI * 0.5));
+      } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.D)) {
+        this.body.velocity.set(PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY + Math.PI * 0.5), PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY + Math.PI * 0.5));
+      } else {
+        this.body.velocity.set(0, 0);
       }
 
-      this.body.velocity.set(PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY), PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY));
-    } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.S)) {
-      this.body.velocity.set(-PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY), -PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY));
-    } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.A)) {
-      this.body.velocity.set(PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY - Math.PI * 0.5), PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY - Math.PI * 0.5));
-    } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.D)) {
-      this.body.velocity.set(PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY + Math.PI * 0.5), PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY + Math.PI * 0.5));
-    } else {
-      this.body.velocity.set(0, 0);
-    }
-
-    if (this.body.enable) {
-      if (this.game.input.keyboard.isDown(Phaser.KeyCode.E)) {
-        this.data.gameState.rotationY += this.game.time.elapsed * ControlsSettings.keyboardXSensitivity;
-      } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.Q)) {
-        this.data.gameState.rotationY -= this.game.time.elapsed * ControlsSettings.keyboardXSensitivity;
+      if (this.body.enable) {
+        if (this.game.input.keyboard.isDown(Phaser.KeyCode.E)) {
+          this.data.gameState.rotationY += this.game.time.elapsed * ControlsSettings.keyboardXSensitivity;
+        } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.Q)) {
+          this.data.gameState.rotationY -= this.game.time.elapsed * ControlsSettings.keyboardXSensitivity;
+        }
       }
     }
   };
