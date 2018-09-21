@@ -58,7 +58,7 @@ Preload.prototype.update = function () {
 var main = function () {
 	console.log('hello, agbic! 😊');
 
-	var game = new Phaser.Game(240, 320, Phaser.AUTO, undefined, undefined, true, false);
+	var game = new Phaser.Game(320, 240, Phaser.AUTO, undefined, undefined, true, false);
 	game.state.add('Preload', Preload, false);
   game.state.add('Gameplay', Gameplay, false);
 

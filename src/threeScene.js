@@ -11,11 +11,14 @@ var threeAssetsLoaded = false;
 	var camera = undefined;
 	var renderer = undefined;
 
+  var assetsToLoad = [
+    'test'
+  ];
 	var assetsMap = {};
 
 	initalizeThreeJS = function (phaserWebGLContext) {
 		scene = new THREE.Scene();
-		camera = new THREE.PerspectiveCamera( 75, 240 / 320, 0.1, 600 );
+		camera = new THREE.PerspectiveCamera( 75, phaserWebGLContext.drawingBufferWidth / phaserWebGLContext.drawingBufferHeight, 0.1, 600 );
 
 		renderer = new THREE.WebGLRenderer();
 		renderer.setSize(phaserWebGLContext.drawingBufferWidth, phaserWebGLContext.drawingBufferHeight );
@@ -25,9 +28,6 @@ var threeAssetsLoaded = false;
 	};
 
 	loadThreeJSAssets = function () {
-		var assetsToLoad = [
-			'test'
-		];
 		var assetsFinishedLoading = 0;
 
   		var tl = new THREE.TextureLoader();
@@ -48,32 +48,46 @@ var threeAssetsLoaded = false;
 	populateThreeTestScene = function (tilemapData, monsters, items) {
 
 		var wallsTexture = assetsMap['test'].clone();
-        wallsTexture.needsUpdate = true;
-        wallsTexture.magFilter = THREE.NearestFilter;
-        wallsTexture.minFilter = THREE.NearestFilter;
-        wallsTexture.wrapS = THREE.RepeatWrapping;
-        wallsTexture.wrapT = THREE.RepeatWrapping;
-        wallsTexture.repeat.set(32 / wallsTexture.image.width, 32 / wallsTexture.image.height);
-        wallsTexture.offset.x = 0;
-        wallsTexture.offset.y = 0.5;
+    wallsTexture.needsUpdate = true;
+    wallsTexture.magFilter = THREE.NearestFilter;
+    wallsTexture.minFilter = THREE.NearestFilter;
+    wallsTexture.wrapS = THREE.RepeatWrapping;
+    wallsTexture.wrapT = THREE.RepeatWrapping;
+    wallsTexture.repeat.set(32 / wallsTexture.image.width, 32 / wallsTexture.image.height);
+    wallsTexture.offset.x = 0;
+    wallsTexture.offset.y = 0.5;
 
-        var monsterTexture = assetsMap['test'].clone();
-        monsterTexture.needsUpdate = true;
-        monsterTexture.magFilter = THREE.NearestFilter;
-        monsterTexture.minFilter = THREE.NearestFilter;
-        monsterTexture.wrapS = THREE.RepeatWrapping;
-        monsterTexture.wrapT = THREE.RepeatWrapping;
-        monsterTexture.repeat.set(32 / monsterTexture.image.width, 32 / monsterTexture.image.height);
-        monsterTexture.offset.x = 0;
-        monsterTexture.offset.y = 1 - (1/8);
-        var monsterMaterial = new THREE.SpriteMaterial( { map: monsterTexture, fog: true } );
+    var ceilingTexture = wallsTexture.clone();
+    ceilingTexture.needsUpdate = true;
+    ceilingTexture.repeat.set(32 / wallsTexture.image.width, 32 / wallsTexture.image.height);
+
+    var monsterTexture = assetsMap['test'].clone();
+    monsterTexture.needsUpdate = true;
+    monsterTexture.magFilter = THREE.NearestFilter;
+    monsterTexture.minFilter = THREE.NearestFilter;
+    monsterTexture.wrapS = THREE.RepeatWrapping;
+    monsterTexture.wrapT = THREE.RepeatWrapping;
+    monsterTexture.repeat.set(32 / monsterTexture.image.width, 32 / monsterTexture.image.height);
+    monsterTexture.offset.x = 0;
+    monsterTexture.offset.y = 1 - (1/8);
+    var monsterMaterial = new THREE.SpriteMaterial( { map: monsterTexture, fog: true } );
 
 		var geometry = new THREE.BoxBufferGeometry( 32, 32, 32 );
 		var wallMaterial = new THREE.MeshBasicMaterial( { map: wallsTexture } );
-		var floorMaterial = new THREE.MeshBasicMaterial( { color: 0x313233, map: wallsTexture} );
-		var ceilingMaterial = new THREE.MeshBasicMaterial( { color: 0x333344, map: wallsTexture } );
+		var floorMaterial = new THREE.MeshBasicMaterial( { color: 0x212253, map: ceilingTexture} );
+		var ceilingMaterial = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, map: ceilingTexture } );
 
 		scene.background = new THREE.Color( 0x111133 );
+
+		var ceilingGeometry = new THREE.PlaneBufferGeometry(tilemapData.layers[0].width * 32, tilemapData.layers[0].height * 32, tilemapData.layers[0].width, tilemapData.layers[0].height);
+		var ceiling = new THREE.Mesh(ceilingGeometry, ceilingMaterial);
+		ceiling.position.set(tilemapData.layers[0].width * 32 * 0.5, 16, tilemapData.layers[0].height * 32 * 0.5);
+		ceiling.rotation.x = Math.PI * 0.5;
+		scene.add(ceiling);
+    var floor = new THREE.Mesh(ceilingGeometry, floorMaterial);
+    floor.position.set(tilemapData.layers[0].width * 32 * 0.5, -16, tilemapData.layers[0].height * 32 * 0.5);
+    floor.rotation.x = Math.PI * -0.5;
+    scene.add(floor);
 
 		tilemapData.layers.forEach(function (layer) {
 			if (layer.name === 'monsters' || layer.name === 'items') {
@@ -82,14 +96,10 @@ var threeAssetsLoaded = false;
 
 			var material = floorMaterial;
 			var testMaterialMap = {
-				walls: wallMaterial,
-				floor: floorMaterial,
-				ceiling: ceilingMaterial
+				walls: wallMaterial
 			};
 			var testMaterialHeights = {
-				walls: 0,
-				floor: -32,
-				ceiling: 32
+				walls: 0
 			};
 			material = testMaterialMap[layer.name];
 			blockHeight = testMaterialHeights[layer.name];
@@ -123,7 +133,6 @@ var threeAssetsLoaded = false;
 			sprite.scale.set(16, 16, 16);
 			scene.add(sprite);
 			item.data.threeSprite = sprite;
-			console.log(sprite);
 		}, this);
 
 		scene.fog = new THREE.Fog( new THREE.Color( 0x39414f ), 5, 250 );
