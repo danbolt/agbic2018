@@ -138,14 +138,14 @@ var threeAssetsLoaded = false;
 		scene.fog = new THREE.Fog( new THREE.Color( 0x39414f ), 5, 250 );
 
 		camera.position.x = 3;
-		camera.position.y = -4;
+		camera.position.y = 0;
 		camera.position.z = 5;
 	};
 
 	renderThreeScene = function (x, y, rotationY) {
 		camera.position.x = x;
 		camera.position.z = y;
-		var pos = new THREE.Vector3(camera.position.x + (10 * Math.cos(rotationY)), -4, camera.position.z + (10 * Math.sin(rotationY)));
+		var pos = new THREE.Vector3(camera.position.x + (10 * Math.cos(rotationY)), 0, camera.position.z + (10 * Math.sin(rotationY)));
 		camera.lookAt(pos);
 		renderer.render( scene, camera );
 	};
