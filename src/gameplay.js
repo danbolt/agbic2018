@@ -3,8 +3,6 @@ var ControlsSettings = {
   keyboardXSensitivity: 0.004
 };
 
-var PlayerWalkSpeed = 50;
-
 var Gameplay = function () {
   this.mapKey = null;
   this.player = null;
@@ -13,6 +11,7 @@ var Gameplay = function () {
   this.items = null;
 
   this.ui = null;
+  this.ui_hand = null;
 
   this.rotationY = 0;
 };
@@ -68,6 +67,33 @@ Gameplay.prototype.create = function() {
 
       this.items.addChild(newItem);
     }, this);
+  };
+
+  this.ui = this.game.add.group();
+  this.ui.fixedToCamera = true;
+  this.ui_hand = this.game.add.group();
+  this.ui.addChild(this.ui_hand);
+
+  var cards = [
+    new Card(this.game, 'strike', 'uhh...', 19, function () { console.log('strike'); }, this),
+    new Card(this.game, '5d', 'well...', 19, function () { console.log('five of diamonds'); }, this),
+    new Card(this.game, 'parry', 'umm...', 19, function () { console.log('parry'); }, this)
+  ];
+  cards.forEach(function (card, index) {
+    var cardButton = this.game.add.existing(new CardUXElement(this.game, index * 64, this.game.height - 56, card));
+    this.ui_hand.addChild(cardButton);
+  }, this);
+  //this.ui_hand.children[2].resetCardData(new Card(this.game, '3', 'yikes', 19, function () { console.log('san!'); }, this));
+  
+  var buttonToCardIndex = {
+    0: 2,
+    2: 1,
+    3: 0
+  };
+  this.game.input.gamepad.onDownCallback = (b) => {
+    if (buttonToCardIndex[b] !== undefined) {
+      this.ui_hand.children[buttonToCardIndex[b]].onInputUp.dispatch();
+    }
   }
 
   populateThreeTestScene(this.game.cache.getTilemapData('level_map').data, this.monsters.children, this.items.children);
@@ -89,6 +115,7 @@ Gameplay.prototype.shutdown = function() {
   this.items = null;
 
   this.ui = null;
+  this.ui_hand = null;
 
   this.rotationY = 0;
 };
