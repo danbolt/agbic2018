@@ -45,6 +45,8 @@ Preload.prototype.create = function() {
 
   this.startThreeJS();
 
+  this.game.input.gamepad.start();
+
   this.game.scale.onSizeChange.dispatch();
 };
 Preload.prototype.update = function () {

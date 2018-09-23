@@ -23,34 +23,8 @@ Gameplay.prototype.preload = function () {
   this.game.load.tilemap('level_map', 'asset/map/' + this.mapKey + '.json', undefined, Phaser.Tilemap.TILED_JSON);
 };
 Gameplay.prototype.create = function() {
-  this.player = this.game.add.sprite(32, 32, 'test_sheet', 0);
+  this.player = this.game.add.existing(new Player(this.game, 32, 32));
   this.player.data.gameState = this;
-  this.player.width = 12;
-  this.player.height = 12;
-  this.player.renderable = false;
-  this.player.update = function () {
-    // Keyboard input
-    if (this.game.input.keyboard.isDown(Phaser.KeyCode.W)) {
-      this.body.velocity.set(PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY), PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY));
-    } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.S)) {
-      this.body.velocity.set(-PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY), -PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY));
-    } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.A)) {
-      this.body.velocity.set(PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY - Math.PI * 0.5), PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY - Math.PI * 0.5));
-    } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.D)) {
-      this.body.velocity.set(PlayerWalkSpeed * Math.cos(this.data.gameState.rotationY + Math.PI * 0.5), PlayerWalkSpeed * Math.sin(this.data.gameState.rotationY + Math.PI * 0.5));
-    } else {
-      this.body.velocity.set(0, 0);
-    }
-
-    if (this.body.enable) {
-      if (this.game.input.keyboard.isDown(Phaser.KeyCode.E)) {
-        this.data.gameState.rotationY += this.game.time.elapsed * ControlsSettings.keyboardXSensitivity;
-      } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.Q)) {
-        this.data.gameState.rotationY -= this.game.time.elapsed * ControlsSettings.keyboardXSensitivity;
-      }
-    }
-  };
-  this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
 
   this.rotationY = 0;
 
