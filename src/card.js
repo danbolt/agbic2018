@@ -9,11 +9,11 @@ var Card = function (game, name, description, frame, callback, callbackContext) 
   this.callbackContext = callbackContext;
 };
 Card.prototype.activate = function () {
-  this.callback.call(callbackContext);
+  this.callback.call(this.callbackContext);
 };
 
 var CardUXElement = function (game, x, y, cardData) {
-  Phaser.Button.call(this, game, x, y, 'test_sheet', cardData.callback, cardData.callbackContext, 16, 17, 18, 17);
+  Phaser.Sprite.call(this, game, x, y, 'test_sheet', 17);
 
   this.width = 64;
   this.height = 64;
@@ -25,12 +25,9 @@ var CardUXElement = function (game, x, y, cardData) {
 
   this.cardData = cardData;
 };
-CardUXElement.prototype = Object.create(Phaser.Button.prototype);
+CardUXElement.prototype = Object.create(Phaser.Sprite.prototype);
 CardUXElement.prototype.constructor = CardUXElement;
 CardUXElement.prototype.resetCardData = function (newCardData) {
-  this.onInputUp.remove(this.cardData.callback);
-
   this.cardData = newCardData;
   this.cardNameLabel.text = this.cardData.name;
-  this.onInputUp.add(newCardData.callback, newCardData.callbackContext);
 }

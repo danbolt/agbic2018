@@ -25,10 +25,10 @@ Player.prototype.update = function () {
     this.body.velocity.y += -this.walkSpeed * Math.sin(this.data.gameState.rotationY);
   }
 
-  if (this.game.input.keyboard.isDown(Phaser.KeyCode.A) || (this.game.input.gamepad.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X) > 0.0)) {
+  if (this.game.input.keyboard.isDown(Phaser.KeyCode.A) || (this.game.input.gamepad.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X) < 0.0)) {
     this.body.velocity.x += this.walkSpeed * Math.cos(this.data.gameState.rotationY - Math.PI * 0.5);
     this.body.velocity.y += this.walkSpeed * Math.sin(this.data.gameState.rotationY - Math.PI * 0.5);
-  } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.D) || (this.game.input.gamepad.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X) < 0.0)) {
+  } else if (this.game.input.keyboard.isDown(Phaser.KeyCode.D) || (this.game.input.gamepad.pad1.axis(Phaser.Gamepad.XBOX360_STICK_LEFT_X) > 0.0)) {
     this.body.velocity.x += (this.walkSpeed * Math.cos(this.data.gameState.rotationY + Math.PI * 0.5));
     this.body.velocity.y += this.walkSpeed * Math.sin(this.data.gameState.rotationY + Math.PI * 0.5);
   }
