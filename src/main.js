@@ -50,7 +50,7 @@ Preload.prototype.create = function() {
   this.game.scale.onSizeChange.dispatch();
 };
 Preload.prototype.update = function () {
-  if (threeAssetsLoaded === true) {
+  if (threeImagesLoaded === true) {
     this.game.state.start('Gameplay', true, false, 'floor0');
   }
 }

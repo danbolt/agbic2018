@@ -4,17 +4,23 @@ var populateThreeTestScene = undefined;
 var renderThreeScene = undefined;
 
 var threeCanvas = undefined;
-var threeAssetsLoaded = false;
+var threeImagesLoaded = false;
+var threeModelsLoaded = false;
 
 (function () {
 	var scene = undefined;
 	var camera = undefined;
 	var renderer = undefined;
 
-  var assetsToLoad = [
+  var imagesToLoad = [
     'test'
   ];
-	var assetsMap = {};
+	var imagesMap = {};
+
+  var modelsToLoad = [
+    'squirtle'
+  ];
+  var modelsMap = {};
 
 	initalizeThreeJS = function (phaserWebGLContext) {
 		scene = new THREE.Scene();
@@ -28,26 +34,48 @@ var threeAssetsLoaded = false;
 	};
 
 	loadThreeJSAssets = function () {
-		var assetsFinishedLoading = 0;
+		var imagesFinishedLoading = 0;
+		var tl = new THREE.TextureLoader();
+		imagesToLoad.forEach(function (imageName) {
+			tl.load('asset/image/' + imageName + '.png', function (loadedTexture) {
+				imagesMap[imageName] = loadedTexture;
 
-  		var tl = new THREE.TextureLoader();
+				imagesFinishedLoading++;
+				if (imagesFinishedLoading === imagesToLoad.length) {
+					threeImagesLoaded = true;
+					console.log('done loading three images!');
+				}
+			});
+		}, this);
 
-  		assetsToLoad.forEach(function (assetName) {
-  			tl.load('asset/image/' + assetName + '.png', function (loadedTexture) {
-  				assetsMap[assetName] = loadedTexture;
-
-  				assetsFinishedLoading++;
-  				if (assetsFinishedLoading === assetsToLoad.length) {
-  					threeAssetsLoaded = true;
-  					console.log('done loading three assets!');
-  				}
-  			});
-  		}, this);
+    var modelsFinishedLoading = 0;
+    var ml = new THREE.GLTFLoader();
+    modelsToLoad.forEach(function (modelName) {
+      ml.load('asset/model/gltf/' + modelName + '.gltf', function (gltf) {
+        gltf.scene.traverse(function (child) {
+          //console.log(child);
+          if (child.name === 'model') {
+            child.children.forEach(function (subchild) {
+              //console.log(subchild.material);
+              //subchild.material = new THREE.MeshBasicMaterial({map: subchild.map, color:0x555555});
+            }, this);
+            modelsMap[modelName] = child;
+          }
+        }, function (error) {
+          console.log(error);
+        });
+        modelsFinishedLoading++;
+        if (modelsFinishedLoading === modelsToLoad.length) {
+          threeModelsLoaded = true;
+          console.log('done loading three models!');
+        }
+      });
+    }, this);
 	};
 
 	populateThreeTestScene = function (tilemapData, monsters, items) {
 
-		var wallsTexture = assetsMap['test'].clone();
+		var wallsTexture = imagesMap['test'].clone();
     wallsTexture.needsUpdate = true;
     wallsTexture.magFilter = THREE.NearestFilter;
     wallsTexture.minFilter = THREE.NearestFilter;
@@ -61,7 +89,7 @@ var threeAssetsLoaded = false;
     ceilingTexture.needsUpdate = true;
     ceilingTexture.repeat.set(32 / wallsTexture.image.width, 32 / wallsTexture.image.height);
 
-    var monsterTexture = assetsMap['test'].clone();
+    var monsterTexture = imagesMap['test'].clone();
     monsterTexture.needsUpdate = true;
     monsterTexture.magFilter = THREE.NearestFilter;
     monsterTexture.minFilter = THREE.NearestFilter;
@@ -121,10 +149,10 @@ var threeAssetsLoaded = false;
 		}, this);
 
 		monsters.forEach(function (monster) {
-			var sprite = new THREE.Sprite(monsterMaterial);
-			sprite.position.set(monster.x, 0, monster.y);
-			sprite.scale.set(32, 32, 32);
-			scene.add(sprite);
+      var testModel = modelsMap['squirtle'].clone();
+      testModel.position.set(monster.x, -16, monster.y);
+      testModel.scale.set(0.0925, 0.0925, 0.0925);
+      scene.add(testModel);
 		}, this);
 
 		items.forEach(function (item) {
@@ -140,6 +168,9 @@ var threeAssetsLoaded = false;
 		camera.position.x = 3;
 		camera.position.y = 0;
 		camera.position.z = 5;
+
+    var light = new THREE.AmbientLight( 0xFFFFFF ); // soft white light
+    scene.add(light);
 	};
 
 	renderThreeScene = function (x, y, rotationY) {
