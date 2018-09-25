@@ -53,11 +53,8 @@ var threeModelsLoaded = false;
     modelsToLoad.forEach(function (modelName) {
       ml.load('asset/model/gltf/' + modelName + '.gltf', function (gltf) {
         gltf.scene.traverse(function (child) {
-          //console.log(child);
           if (child.name === 'model') {
             child.children.forEach(function (subchild) {
-              //console.log(subchild.material);
-              //subchild.material = new THREE.MeshBasicMaterial({map: subchild.map, color:0x555555});
             }, this);
             modelsMap[modelName] = child;
           }
@@ -102,7 +99,7 @@ var threeModelsLoaded = false;
 
 		var geometry = new THREE.BoxBufferGeometry( 32, 32, 32 );
 		var wallMaterial = new THREE.MeshBasicMaterial( { map: wallsTexture } );
-		var floorMaterial = new THREE.MeshBasicMaterial( { color: 0x212253, map: ceilingTexture} );
+		var floorMaterial = new THREE.MeshBasicMaterial( { color: 0x515253, map: ceilingTexture} );
 		var ceilingMaterial = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, map: ceilingTexture } );
 
 		scene.background = new THREE.Color( 0x111133 );
