@@ -14,7 +14,7 @@ var Gameplay = function () {
 
   this.deck = [];
   this.discard = [];
-  this.hand = [];
+  this.currentDeckIndex = 0;
 
   this.ui = null;
   this.ui_hand = null;
@@ -77,11 +77,15 @@ Gameplay.prototype.create = function() {
 
   this.deck = [];
   this.discard = [];
-  this.hand = [];
+  this.currentDeckIndex = 0;
 
-  this.hand = [
+  this.deck = [
     new Card(this.game, 'strike', 'uhh...', 19, function () { console.log('strike'); }, this),
     new Card(this.game, '5d', 'well...', 19, function () { console.log('five of diamonds'); }, this),
+    new Card(this.game, '6h', 'well...', 19, function () { console.log('six of hearts'); }, this),
+    new Card(this.game, '1d', 'well...', 19, function () { console.log('ace of diamonds'); }, this),
+    new Card(this.game, '5s', 'well...', 19, function () { console.log('five of spades'); }, this),
+    new Card(this.game, 'qc', 'well...', 19, function () { console.log('queen of clubs'); }, this),
     new Card(this.game, 'parry', 'umm...', 19, function () { console.log('parry'); }, this)
   ];
 
@@ -95,26 +99,36 @@ Gameplay.prototype.create = function() {
     var cardButton = this.game.add.existing(new CardUXElement(this.game, i * 64, this.game.height - 56, dummyCard));
     this.ui_hand.addChild(cardButton);
   }
-  this.refreshHandVisual();
+  this.refreshHand();
   
-  var buttonToCardIndex = {
-    0: 2,
-    2: 1,
-    3: 0
-  };
   this.game.input.gamepad.onDownCallback = (buttonCode) => {
-    if (buttonToCardIndex[buttonCode] !== undefined) {
-      this.hand[buttonToCardIndex[buttonCode]].activate();
-    }
-  };
-  var keyToCardIndex = {
-    74: 2,
-    75: 1,
-    76: 0
+    //
   };
   this.game.input.keyboard.onDownCallback = (key) => {
-    if (keyToCardIndex[key.keyCode] !== undefined) {
-      this.hand[keyToCardIndex[key.keyCode]].activate();
+    if (key.keyCode === Phaser.KeyCode.RIGHT) {
+      this.currentDeckIndex = (this.currentDeckIndex + 1) % this.deck.length;
+      this.refreshHand();
+    } else if (key.keyCode === Phaser.KeyCode.LEFT) {
+      this.currentDeckIndex = (this.currentDeckIndex - 1 + this.deck.length) % this.deck.length;
+      this.refreshHand();
+    } else if (key.keyCode === Phaser.KeyCode.UP) {
+      if (this.deck.length > 0) {
+        var currentCard = this.deck[this.currentDeckIndex];
+        this.deck.splice(this.currentDeckIndex, 1);
+        this.currentDeckIndex = ((this.currentDeckIndex - 1 + this.deck.length) % this.deck.length);
+        this.refreshHand();
+
+        currentCard.activate();
+        this.discard.push(currentCard);
+      }
+    } else if (key.keyCode === Phaser.KeyCode.DOWN) {
+      if (this.deck.length === 0) {
+        this.currentDeckIndex = 0;
+        var swap = this.discard;
+        this.discard = this.deck;
+        this.deck = swap;
+        this.refreshHand();
+      }
     }
   };
 
@@ -127,11 +141,6 @@ Gameplay.prototype.update = function() {
 
 	renderThreeScene(this.player.centerX, this.player.centerY, this.rotationY);
 };
-Gameplay.prototype.refreshHandVisual = function () {
-  this.hand.forEach(function (card, index) {
-    this.ui_hand.children[index].resetCardData(card, this);
-  }, this);
-};
 Gameplay.prototype.shutdown = function() {
   this.game.cache.removeTilemap('level_map');
 
@@ -143,7 +152,7 @@ Gameplay.prototype.shutdown = function() {
 
   this.deck = null;
   this.discard = null;
-  this.hand = null;
+  this.currentDeckIndex = 0;
 
   this.ui = null;
   this.ui_hand = null;
@@ -151,6 +160,17 @@ Gameplay.prototype.shutdown = function() {
   this.rotationY = 0;
 };
 
+Gameplay.prototype.refreshHand = function () {
+  this.ui_hand.children.forEach(function (child, index) {
+    if (index < this.deck.length) {
+      child.visible = true;
+      var card = this.deck[(this.currentDeckIndex + index) % this.deck.length];
+      child.resetCardData(card);
+    } else {
+      child.visible = false;
+    }
+  }, this);
+};
 Gameplay.prototype.isMonsterInFrontOfPlayer = function() {
   var player = this.player;
   var rotation = this.rotationY;
