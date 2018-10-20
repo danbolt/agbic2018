@@ -4,6 +4,8 @@ var ControlsSettings = {
 };
 
 const NumberOfCardsInHand = 3;
+const ManaPerSecond = 0.44; // change this later
+const MaxMana = 8;
 
 var Gameplay = function () {
   this.mapKey = null;
@@ -18,6 +20,11 @@ var Gameplay = function () {
 
   this.ui = null;
   this.ui_hand = null;
+  this.ui_debug_mana_count = null;
+
+  this.mana = 0;
+  this.maxMana = MaxMana;
+  this.manaTickHandle = null;
 
   this.rotationY = 0;
 };
@@ -79,28 +86,39 @@ Gameplay.prototype.create = function() {
   this.discard = [];
   this.currentDeckIndex = 0;
 
+  this.mana = 0;
+  this.maxMana = MaxMana;
+  this.manaTickHandle = this.game.time.events.loop(1000 / ManaPerSecond, function () {
+    this.mana++;
+    this.mana = Math.min(this.mana, this.maxMana);
+    this.ui_debug_mana_count.text = 'mana: ' + this.mana;
+  }, this);
+
   this.deck = [
-    new Card(this.game, 'strike', 'uhh...', 19, function () { console.log('strike'); }, this),
-    new Card(this.game, '5d', 'well...', 19, function () { console.log('five of diamonds'); }, this),
-    new Card(this.game, '6h', 'well...', 19, function () { console.log('six of hearts'); }, this),
-    new Card(this.game, '1d', 'well...', 19, function () { console.log('ace of diamonds'); }, this),
-    new Card(this.game, '5s', 'well...', 19, function () { console.log('five of spades'); }, this),
-    new Card(this.game, 'qc', 'well...', 19, function () { console.log('queen of clubs'); }, this),
-    new Card(this.game, 'parry', 'umm...', 19, function () { console.log('parry'); }, this)
+    new StrikeCard(this.game, 253, 250, 1, this),
+    new ParryCard(this.game, 200, 400, 1, this),
+    new ParryCard(this.game, 300, 100, 1, this),
+    new ParryCard(this.game, 400, 200, 1, this),
   ];
 
   this.ui = this.game.add.group();
   this.ui.fixedToCamera = true;
   this.ui_hand = this.game.add.group();
   this.ui.addChild(this.ui_hand);
+  this.ui_debug_mana_count = this.game.add.bitmapText(8, 8, 'font', 'mana: 0', 8);
+  this.ui.addChild(this.ui_debug_mana_count);
 
-  var dummyCard = new Card(this.game, 'dummy', 'a dummy card', 19, function () { throw "Do not use this"; }, this);
+  var dummyCard = new Card(this.game, 'dummy', 'a dummy card', 19, function () { throw "Invalid placeholder card"; }, this);
   for (var i = 0; i < NumberOfCardsInHand; i++) {
     var cardButton = this.game.add.existing(new CardUXElement(this.game, i * 64, this.game.height - 56, dummyCard));
     this.ui_hand.addChild(cardButton);
   }
   this.refreshHand();
   
+  let cardCompleteCallback = () => {
+    this.player.body.velocity.set(0, 0);
+    this.player.movementEnabled = true;
+  };
   this.game.input.gamepad.onDownCallback = (buttonCode) => {
     //
   };
@@ -114,12 +132,19 @@ Gameplay.prototype.create = function() {
     } else if (key.keyCode === Phaser.KeyCode.UP) {
       if (this.deck.length > 0) {
         var currentCard = this.deck[this.currentDeckIndex];
-        this.deck.splice(this.currentDeckIndex, 1);
-        this.currentDeckIndex = ((this.currentDeckIndex - 1 + this.deck.length) % this.deck.length);
-        this.refreshHand();
+        if (currentCard.manaCost <= this.mana) {
+          this.deck.splice(this.currentDeckIndex, 1);
+          this.currentDeckIndex = ((this.currentDeckIndex - 1 + this.deck.length) % this.deck.length);
+          this.refreshHand();
 
-        currentCard.activate();
-        this.discard.push(currentCard);
+
+          this.player.body.velocity.set(0, 0);
+          this.player.movementEnabled = false;
+          currentCard.activate(cardCompleteCallback);
+          this.discard.push(currentCard);
+          this.mana -= currentCard.manaCost;
+          this.ui_debug_mana_count.text = 'mana: ' + this.mana;
+        }
       }
     } else if (key.keyCode === Phaser.KeyCode.DOWN) {
       if (this.deck.length === 0) {
@@ -156,6 +181,12 @@ Gameplay.prototype.shutdown = function() {
 
   this.ui = null;
   this.ui_hand = null;
+
+  this.mana = 0;
+  this.maxMana = MaxMana;
+  this.game.time.events.remove(this.manaTickHandle);
+  this.manaTickHandle = null;
+  this.ui_debug_mana_count = null;
 
   this.rotationY = 0;
 };
