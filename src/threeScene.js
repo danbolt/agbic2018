@@ -1,6 +1,7 @@
 var initalizeThreeJS = undefined;
 var loadThreeJSAssets = undefined;
 var populateThreeTestScene = undefined;
+var updateThreeScene = undefined;
 var renderThreeScene = undefined;
 
 var threeCanvas = undefined;
@@ -11,6 +12,8 @@ var threeModelsLoaded = false;
 	var scene = undefined;
 	var camera = undefined;
 	var renderer = undefined;
+
+  var ingameMonsters = [];
 
   var imagesToLoad = [
     'test'
@@ -145,11 +148,16 @@ var threeModelsLoaded = false;
 
 		}, this);
 
+    ingameMonsters = [];
+
 		monsters.forEach(function (monster) {
       var testModel = modelsMap['squirtle'].clone();
       testModel.position.set(monster.x, -16, monster.y);
       testModel.scale.set(0.0925, 0.0925, 0.0925);
+      testModel.userData.gameObject = monster;
+      testModel.up = new THREE.Vector3(0, 1, 0);
       scene.add(testModel);
+      ingameMonsters.push(testModel);
 		}, this);
 
 		items.forEach(function (item) {
@@ -169,6 +177,15 @@ var threeModelsLoaded = false;
     var light = new THREE.AmbientLight( 0xFFFFFF ); // soft white light
     scene.add(light);
 	};
+
+  updateThreeScene = function (gameplay) {
+    ingameMonsters.forEach(function (monster) {
+      monster.position.set(monster.userData.gameObject.x, -16, monster.userData.gameObject.y);
+      const velocity = monster.userData.gameObject.body.velocity;
+      monster.lookAt(monster.position.x + velocity.x, -16, monster.position.z + velocity.y);
+      monster.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI * 0.5);
+    }, this);
+  };
 
 	renderThreeScene = function (x, y, rotationY) {
 		camera.position.x = x;

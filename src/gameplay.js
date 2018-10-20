@@ -61,6 +61,10 @@ Gameplay.prototype.create = function() {
       newMonster.body.immovable = true;
       newMonster.body.kinematic = true;
       newMonster.data = monster;
+      newMonster.body.velocity.y = 100;
+      newMonster.update = function () {
+        this.body.velocity.rotate(0, 0, this.game.time.elapsed * 0.001);
+      };
 
       this.monsters.addChild(newMonster);
       this.monsters.addToHash(newMonster);
@@ -166,6 +170,7 @@ Gameplay.prototype.update = function() {
   this.game.physics.arcade.collide(this.player, this.monsters);
   this.game.physics.arcade.collide(this.monsters, this.foreground);
 
+  updateThreeScene(this);
 	renderThreeScene(this.player.centerX, this.player.centerY, this.rotationY);
 };
 Gameplay.prototype.shutdown = function() {
