@@ -180,6 +180,11 @@ var threeModelsLoaded = false;
 
   updateThreeScene = function (gameplay) {
     ingameMonsters.forEach(function (monster) {
+      if (monster.userData.gameObject.alive === false) {
+        monster.visible = false;
+        return;
+      }
+
       monster.position.set(monster.userData.gameObject.x, -16, monster.userData.gameObject.y);
       const velocity = monster.userData.gameObject.body.velocity;
       monster.lookAt(monster.position.x + velocity.x, -16, monster.position.z + velocity.y);

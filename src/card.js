@@ -13,6 +13,9 @@ var Card = function (game, name, description, frame, callback, callbackContext, 
 Card.prototype.activate = function (onCompleteCallback) {
   this.callback.call(this.callbackContext, onCompleteCallback);
 };
+Card.prototype.tick = function() {
+  //
+};
 
 var ParryCard = function(game, speed, timeMoving, cost, callbackContext) {
   Card.call(this, game, 'parry', 'Does a parry', 20, function (onComplete) {
@@ -42,6 +45,13 @@ var StrikeCard = function(game, speed, timeMoving, cost, callbackContext) {
   }, callbackContext, cost);
 };
 StrikeCard.prototype = Object.create(Card.prototype);
+StrikeCard.prototype.tick = function () {
+  //console.log('striking');
+  let monsterInFront = this.isMonsterInFrontOfPlayer();
+  if (monsterInFront !== null) {
+    monsterInFront.kill();
+  }
+};
 
 var CardUXElement = function (game, x, y, cardData) {
   Phaser.Sprite.call(this, game, x, y, 'test_sheet', cardData.frame);

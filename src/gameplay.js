@@ -17,6 +17,7 @@ var Gameplay = function () {
   this.deck = [];
   this.discard = [];
   this.currentDeckIndex = 0;
+  this.activeCardTick = null;
 
   this.ui = null;
   this.ui_hand = null;
@@ -89,6 +90,7 @@ Gameplay.prototype.create = function() {
   this.deck = [];
   this.discard = [];
   this.currentDeckIndex = 0;
+  this.activeCardTick = null;
 
   this.mana = 0;
   this.maxMana = MaxMana;
@@ -124,6 +126,7 @@ Gameplay.prototype.create = function() {
   let cardCompleteCallback = () => {
     this.player.body.velocity.set(0, 0);
     this.player.movementEnabled = true;
+    this.activeCardTick = null;
   };
   this.game.input.gamepad.onDownCallback = (buttonCode) => {
     //
@@ -147,6 +150,7 @@ Gameplay.prototype.create = function() {
           this.player.body.velocity.set(0, 0);
           this.player.movementEnabled = false;
           currentCard.activate(cardCompleteCallback);
+          this.activeCardTick = currentCard.tick;
           this.discard.push(currentCard);
           this.mana -= currentCard.manaCost;
           this.ui_debug_mana_count.text = 'mana: ' + this.mana;
@@ -170,6 +174,10 @@ Gameplay.prototype.update = function() {
   this.game.physics.arcade.collide(this.player, this.monsters);
   this.game.physics.arcade.collide(this.monsters, this.foreground);
 
+  if (this.activeCardTick !== null) {
+    this.activeCardTick.call(this);
+  }
+
   updateThreeScene(this);
 	renderThreeScene(this.player.centerX, this.player.centerY, this.rotationY);
 };
@@ -185,6 +193,7 @@ Gameplay.prototype.shutdown = function() {
   this.deck = null;
   this.discard = null;
   this.currentDeckIndex = 0;
+  this.activeCardTick = null;
 
   this.ui = null;
   this.ui_hand = null;
@@ -214,7 +223,7 @@ Gameplay.prototype.isMonsterInFrontOfPlayer = function() {
   var rotation = this.rotationY;
   var monstersInFront = this.monsters.filter(function (monster) {
     // Are we near the monster? (be bold, young one!)
-    if (player.position.distance(monster.position) > 50) {
+    if (player.position.distance(monster.position) > 32) {
       return false;
     }
 
