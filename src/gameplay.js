@@ -4,8 +4,8 @@ var ControlsSettings = {
 };
 
 const NumberOfCardsInHand = 3;
-const ManaPerSecond = 0.44; // change this later
-const MaxMana = 8;
+const ManaPerSecond = 3; // change this later
+const MaxMana = 32;
 
 var Gameplay = function () {
   this.mapKey = null;
@@ -95,6 +95,8 @@ Gameplay.prototype.create = function() {
   }, this);
 
   this.deck = [
+    new StrikeCard(this.game, 253, 250, 1, this),
+    new StrikeCard(this.game, 253, 250, 1, this),
     new StrikeCard(this.game, 253, 250, 1, this),
     new ParryCard(this.game, 200, 400, 1, this),
     new ParryCard(this.game, 300, 100, 1, this),
