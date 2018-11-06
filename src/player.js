@@ -9,6 +9,7 @@ var Player = function(game, x, y) {
 
   this.walkSpeed = 50;
   this.movementEnabled = true;
+  this.blocking = false;
 
   this.game.physics.enable(this, Phaser.Physics.ARCADE);
 };

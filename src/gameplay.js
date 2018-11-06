@@ -102,6 +102,7 @@ Gameplay.prototype.create = function() {
   }, this);
 
   this.deck = [
+    new BlockCard(this.game, 400, 1, this),
     new StrikeCard(this.game, 253, 250, 1, this),
     new StrikeCard(this.game, 253, 250, 1, this),
     new StrikeCard(this.game, 253, 250, 1, this),

@@ -52,9 +52,13 @@ StrikeCard.prototype.tick = function () {
   }
 };
 
-var BlockCard = function(game, speed, timeMoving, cost, callbackContext) {
+var BlockCard = function(game, timeBlocking, cost, callbackContext) {
   Card.call(this, game, 'block', 'block an attack', 27, function(onComplete) {
-    this.game.time.events.add(timeMoving, function () {
+    this.player.blocking = true;
+
+    this.game.time.events.add(timeBlocking, function () {
+      this.player.blocking = false;
+
       onComplete();
     }, this);
   }, callbackContext, cost);

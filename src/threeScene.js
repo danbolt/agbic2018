@@ -210,6 +210,8 @@ var threeModelsLoaded = false;
         var upDir = new THREE.Vector3(0, 1, 0);
         upDir.cross(new THREE.Vector3(Math.cos(rotationY), 0, Math.sin(rotationY)));
         bladeModel.rotateOnWorldAxis(upDir, Math.PI * 0.5);
+      } else if (gameplay.currentCardName === 'block') {
+        bladeModel.rotateOnWorldAxis(new THREE.Vector3(Math.cos(rotationY), 0, Math.sin(rotationY)), -0.9);
       }
       bladeModel.position.x = camera.position.x + (Math.cos(rotationY + 0.76) * 7);
       bladeModel.position.y = -2
