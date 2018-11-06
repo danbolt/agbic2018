@@ -14,6 +14,7 @@ var threeModelsLoaded = false;
 	var renderer = undefined;
 
   var ingameMonsters = [];
+  var bladeModel = null;
 
   var imagesToLoad = [
     'test'
@@ -21,7 +22,8 @@ var threeModelsLoaded = false;
 	var imagesMap = {};
 
   var modelsToLoad = [
-    'squirtle'
+    'squirtle',
+    'test_blade'
   ];
   var modelsMap = {};
 
@@ -174,6 +176,10 @@ var threeModelsLoaded = false;
 		camera.position.y = 0;
 		camera.position.z = 5;
 
+    bladeModel = modelsMap['test_blade'].clone();
+    bladeModel.position.set(64, 0, 64);
+    scene.add(bladeModel);
+
     var light = new THREE.AmbientLight( 0xFFFFFF ); // soft white light
     scene.add(light);
 	};
@@ -189,14 +195,29 @@ var threeModelsLoaded = false;
       const velocity = monster.userData.gameObject.body.velocity;
       monster.lookAt(monster.position.x + velocity.x, -16, monster.position.z + velocity.y);
       monster.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI * 0.5);
+
+      var player = gameplay.player;
+      var rotationY = gameplay.rotationY;
+      camera.position.x = player.centerX;
+      camera.position.z = player.centerY;
+      var pos = new THREE.Vector3(camera.position.x + (10 * Math.cos(rotationY)), 0, camera.position.z + (10 * Math.sin(rotationY)));
+      camera.lookAt(pos);
+
+      bladeModel.rotation.set(0, 0, 0);
+      bladeModel.lookAt(pos);
+      bladeModel.rotateOnWorldAxis(new THREE.Vector3(Math.cos(rotationY), 0, Math.sin(rotationY)), -0.6);
+      if (gameplay.currentCardName === 'strike') {
+        var upDir = new THREE.Vector3(0, 1, 0);
+        upDir.cross(new THREE.Vector3(Math.cos(rotationY), 0, Math.sin(rotationY)));
+        bladeModel.rotateOnWorldAxis(upDir, Math.PI * 0.5);
+      }
+      bladeModel.position.x = camera.position.x + (Math.cos(rotationY + 0.76) * 7);
+      bladeModel.position.y = -2
+      bladeModel.position.z = camera.position.z + (Math.sin(rotationY + 0.76) * 7);
     }, this);
   };
 
 	renderThreeScene = function (x, y, rotationY) {
-		camera.position.x = x;
-		camera.position.z = y;
-		var pos = new THREE.Vector3(camera.position.x + (10 * Math.cos(rotationY)), 0, camera.position.z + (10 * Math.sin(rotationY)));
-		camera.lookAt(pos);
 		renderer.render( scene, camera );
 	};
 })();

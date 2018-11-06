@@ -46,11 +46,22 @@ var StrikeCard = function(game, speed, timeMoving, cost, callbackContext) {
 };
 StrikeCard.prototype = Object.create(Card.prototype);
 StrikeCard.prototype.tick = function () {
-  //console.log('striking');
   let monsterInFront = this.isMonsterInFrontOfPlayer();
   if (monsterInFront !== null) {
     monsterInFront.kill();
   }
+};
+
+var BlockCard = function(game, speed, timeMoving, cost, callbackContext) {
+  Card.call(this, game, 'block', 'block an attack', 27, function(onComplete) {
+    this.game.time.events.add(timeMoving, function () {
+      onComplete();
+    }, this);
+  }, callbackContext, cost);
+};
+BlockCard.prototype = Object.create(Card.prototype);
+BlockCard.prototype.tick = function () {
+  //console.log('blocking');
 };
 
 var CardUXElement = function (game, x, y, cardData) {

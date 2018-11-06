@@ -18,6 +18,7 @@ var Gameplay = function () {
   this.discard = [];
   this.currentDeckIndex = 0;
   this.activeCardTick = null;
+  this.currentCardName = '';
 
   this.ui = null;
   this.ui_hand = null;
@@ -127,6 +128,7 @@ Gameplay.prototype.create = function() {
     this.player.body.velocity.set(0, 0);
     this.player.movementEnabled = true;
     this.activeCardTick = null;
+    this.currentCardName = '';
   };
   this.game.input.gamepad.onDownCallback = (buttonCode) => {
     //
@@ -151,6 +153,7 @@ Gameplay.prototype.create = function() {
           this.player.movementEnabled = false;
           currentCard.activate(cardCompleteCallback);
           this.activeCardTick = currentCard.tick;
+          this.currentCardName = currentCard.name;
           this.discard.push(currentCard);
           this.mana -= currentCard.manaCost;
           this.ui_debug_mana_count.text = 'mana: ' + this.mana;
@@ -194,6 +197,7 @@ Gameplay.prototype.shutdown = function() {
   this.discard = null;
   this.currentDeckIndex = 0;
   this.activeCardTick = null;
+  this.currentCardName = '';
 
   this.ui = null;
   this.ui_hand = null;
