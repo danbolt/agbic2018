@@ -52,6 +52,7 @@ Gameplay.prototype.create = function() {
 
   this.monsters = this.game.add.group();
   if (map.objects.monsters) {
+    let monsterWalkSpeed = 30;
     map.objects.monsters.forEach(function (monster) {
       var newMonster = this.game.add.sprite(monster.x, monster.y, 'test_sheet', 0);
       newMonster.anchor.set(0.5, 0.5);
@@ -63,9 +64,9 @@ Gameplay.prototype.create = function() {
       newMonster.body.immovable = true;
       newMonster.body.kinematic = true;
       newMonster.data = monster;
-      newMonster.body.velocity.y = 100;
+      newMonster.body.velocity.y = 30;
       newMonster.update = function () {
-        this.body.velocity.rotate(0, 0, this.game.time.elapsed * 0.001);
+        this.body.velocity.set(monsterWalkSpeed * Math.cos(this.game.time.elapsed * 0.01), monsterWalkSpeed * Math.sin(this.game.time.elapsed * 0.01));
       };
 
       this.monsters.addChild(newMonster);
@@ -98,11 +99,12 @@ Gameplay.prototype.create = function() {
   this.manaTickHandle = this.game.time.events.loop(1000 / ManaPerSecond, function () {
     this.mana++;
     this.mana = Math.min(this.mana, this.maxMana);
-    this.ui_debug_mana_count.text = 'mana: ' + this.mana;
+    this.ui_debug_mana_count.text = 'mana: ' + this.mana + '\nhealth: ' + this.player.health;
   }, this);
 
   this.deck = [
-    new BlockCard(this.game, 400, 1, this),
+    new BlockCard(this.game, 800, 1, this),
+    new BlockCard(this.game, 1000, 1, this),
     new StrikeCard(this.game, 253, 250, 1, this),
     new StrikeCard(this.game, 253, 250, 1, this),
     new StrikeCard(this.game, 253, 250, 1, this),
@@ -115,7 +117,7 @@ Gameplay.prototype.create = function() {
   this.ui.fixedToCamera = true;
   this.ui_hand = this.game.add.group();
   this.ui.addChild(this.ui_hand);
-  this.ui_debug_mana_count = this.game.add.bitmapText(8, 8, 'font', 'mana: 0', 8);
+  this.ui_debug_mana_count = this.game.add.bitmapText(8, 8, 'font', 'mana: 0\nhealth: ' + this.player.health, 8);
   this.ui.addChild(this.ui_debug_mana_count);
 
   var dummyCard = new Card(this.game, 'dummy', 'a dummy card', 19, function () { throw "Invalid placeholder card"; }, this);
@@ -135,13 +137,17 @@ Gameplay.prototype.create = function() {
     //
   };
   this.game.input.keyboard.onDownCallback = (key) => {
-    if (key.keyCode === Phaser.KeyCode.RIGHT) {
+    if (key.keyCode === Phaser.KeyCode.LEFT) {
       this.currentDeckIndex = (this.currentDeckIndex + 1) % this.deck.length;
       this.refreshHand();
-    } else if (key.keyCode === Phaser.KeyCode.LEFT) {
+    } else if (key.keyCode === Phaser.KeyCode.RIGHT) {
       this.currentDeckIndex = (this.currentDeckIndex - 1 + this.deck.length) % this.deck.length;
       this.refreshHand();
     } else if (key.keyCode === Phaser.KeyCode.UP) {
+      if (this.player.flickering === true) {
+        return;
+      }
+
       if (this.deck.length > 0) {
         var currentCard = this.deck[this.currentDeckIndex];
         if (currentCard.manaCost <= this.mana) {
@@ -157,7 +163,7 @@ Gameplay.prototype.create = function() {
           this.currentCardName = currentCard.name;
           this.discard.push(currentCard);
           this.mana -= currentCard.manaCost;
-          this.ui_debug_mana_count.text = 'mana: ' + this.mana;
+          this.ui_debug_mana_count.text = 'mana: ' + this.mana + '\nhealth: ' + this.player.health;
         }
       }
     } else if (key.keyCode === Phaser.KeyCode.DOWN) {
@@ -175,7 +181,24 @@ Gameplay.prototype.create = function() {
 };
 Gameplay.prototype.update = function() {
   this.game.physics.arcade.collide(this.player, this.foreground);
-  this.game.physics.arcade.collide(this.player, this.monsters);
+  this.game.physics.arcade.collide(this.player, this.monsters, function (player, monster) {
+    this.player.flickering = true;
+    this.player.movementEnabled = false;
+    this.player.damage(1);
+
+    var knockbackVector = new Phaser.Point(monster.x - player.x, monster.y - player.y);
+    knockbackVector.normalize();
+    this.player.body.velocity.set(knockbackVector.x * this.player.knockbackSpeed, knockbackVector.y * this.player.knockbackSpeed);
+
+    const knockbackTime = 250;
+    this.game.time.events.add(knockbackTime, function () {
+      this.player.flickering = false;
+      this.player.movementEnabled = true;
+      this.player.body.velocity.set(0, 0);
+    }, this);
+  }, function (player, monster) {
+    return !(player.flickering || player.blocking);
+  }, this);
   this.game.physics.arcade.collide(this.monsters, this.foreground);
 
   if (this.activeCardTick !== null) {
