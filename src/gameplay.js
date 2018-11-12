@@ -52,23 +52,8 @@ Gameplay.prototype.create = function() {
 
   this.monsters = this.game.add.group();
   if (map.objects.monsters) {
-    let monsterWalkSpeed = 30;
     map.objects.monsters.forEach(function (monster) {
-      var newMonster = this.game.add.sprite(monster.x, monster.y, 'test_sheet', 0);
-      newMonster.anchor.set(0.5, 0.5);
-      newMonster.tint = 0xff0000;
-      newMonster.width = 16;
-      newMonster.height = 16;
-      newMonster.renderable = false;
-      this.game.physics.enable(newMonster, Phaser.Physics.ARCADE);
-      newMonster.body.immovable = true;
-      newMonster.body.kinematic = true;
-      newMonster.data = monster;
-      newMonster.body.velocity.y = 30;
-      newMonster.update = function () {
-        this.body.velocity.set(monsterWalkSpeed * Math.cos(this.game.time.elapsed * 0.01), monsterWalkSpeed * Math.sin(this.game.time.elapsed * 0.01));
-      };
-
+      var newMonster = new Monster(this.game, monster.x, monster.y, monster);
       this.monsters.addChild(newMonster);
       this.monsters.addToHash(newMonster);
     }, this);
