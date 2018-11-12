@@ -200,6 +200,7 @@ var threeModelsLoaded = false;
       var rotationY = gameplay.rotationY;
       camera.position.x = player.centerX;
       camera.position.z = player.centerY;
+      camera.position.y = Math.sin((player.centerX + (6 * player.centerY)) / 100) * 0.4;
       var pos = new THREE.Vector3(camera.position.x + (10 * Math.cos(rotationY)), 0, camera.position.z + (10 * Math.sin(rotationY)));
       camera.lookAt(pos);
 
