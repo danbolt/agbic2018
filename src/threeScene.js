@@ -2,6 +2,7 @@ var initalizeThreeJS = undefined;
 var loadThreeJSAssets = undefined;
 var populateThreeTestScene = undefined;
 var updateThreeScene = undefined;
+var updateThreeCamera = undefined;
 var renderThreeScene = undefined;
 
 var threeCanvas = undefined;
@@ -76,7 +77,6 @@ var threeModelsLoaded = false;
 	};
 
 	populateThreeTestScene = function (tilemapData, monsters, items) {
-
 		var wallsTexture = imagesMap['test'].clone();
     wallsTexture.needsUpdate = true;
     wallsTexture.magFilter = THREE.NearestFilter;
@@ -217,6 +217,11 @@ var threeModelsLoaded = false;
       bladeModel.position.y = -2
       bladeModel.position.z = camera.position.z + (Math.sin(rotationY + 0.76) * 7);
     }, this);
+  };
+
+  updateThreeCamera = function (fov) {
+    camera.fov = fov ? fov : 75;
+    camera.updateProjectionMatrix();
   };
 
 	renderThreeScene = function (x, y, rotationY) {

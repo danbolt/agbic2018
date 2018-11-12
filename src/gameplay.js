@@ -190,7 +190,23 @@ Gameplay.prototype.update = function() {
     knockbackVector.normalize();
     this.player.body.velocity.set(knockbackVector.x * this.player.knockbackSpeed, knockbackVector.y * this.player.knockbackSpeed);
 
-    const knockbackTime = 250;
+    let cameraFovWarpCompute = (x) => {
+      const a = (2 * x) - 1;
+      const aSquared = a * a;
+      return  (aSquared * -1) + 1;
+    }; 
+    const knockbackTime = 200;
+    const knockBackFovWarp = 20;
+    var t = this.game.add.tween(this.player);
+    t.to({}, knockbackTime, Phaser.Easing.Linear.None);
+    t.onUpdateCallback(function (tween, value, tweenData) {
+      updateThreeCamera(75 + cameraFovWarpCompute(value) * knockBackFovWarp);
+    }, this);
+    t.onComplete.add(function () {
+      updateThreeCamera(75);
+    }, this);
+    t.start();
+
     this.game.time.events.add(knockbackTime, function () {
       this.player.flickering = false;
       this.player.movementEnabled = true;
