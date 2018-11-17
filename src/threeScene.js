@@ -4,6 +4,7 @@ var populateThreeTestScene = undefined;
 var updateThreeScene = undefined;
 var updateThreeCamera = undefined;
 var renderThreeScene = undefined;
+var unloadThreeScene = undefined;
 
 var threeCanvas = undefined;
 var threeImagesLoaded = false;
@@ -228,4 +229,10 @@ var threeModelsLoaded = false;
 	renderThreeScene = function (x, y, rotationY) {
 		renderer.render( scene, camera );
 	};
+
+  unloadThreeScene = function () {
+    while (scene.children.length) {
+      scene.remove(scene.children[0]);
+    }
+  }
 })();

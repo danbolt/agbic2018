@@ -39,6 +39,9 @@ Gameplay.prototype.preload = function () {
 Gameplay.prototype.create = function() {
   this.player = this.game.add.existing(new Player(this.game, 32, 32));
   this.player.data.gameState = this;
+  this.player.events.onKilled.add(() => {
+    this.game.state.start('Gameplay', true, false, 'floor0');
+  });
 
   this.rotationY = 0;
 
@@ -232,6 +235,8 @@ Gameplay.prototype.update = function() {
 };
 Gameplay.prototype.shutdown = function() {
   this.game.cache.removeTilemap('level_map');
+
+  unloadThreeScene();
 
   this.mapKey = null;
   this.player = null;
