@@ -198,6 +198,24 @@ Gameplay.prototype.update = function() {
       this.player.body.velocity.set(0, 0);
     }, this);
   }, function (player, monster) {
+    if (monster.isBeingKnockedBack === true) {
+      return false;
+    }
+
+    if (player.blocking === true) {
+      monster.isBeingKnockedBack = true;
+      Phaser.Point.subtract(monster.position, player.position, monster.knockbackVector);
+      Phaser.Point.normalize(monster.knockbackVector, monster.knockbackVector);
+      monster.knockbackVector.multiply(monster.knockbackSpeed, monster.knockbackSpeed);
+      monster.body.velocity.set(monster.knockbackVector.x, monster.knockbackVector.y);
+
+      this.game.time.events.add(monster.knockbackTime, () => {
+        monster.isBeingKnockedBack = false;
+        monster.body.velocity.set(0, 0);
+        return false;
+      });
+    }
+
     return !(player.flickering || player.blocking);
   }, this);
   this.game.physics.arcade.collide(this.monsters, this.foreground);

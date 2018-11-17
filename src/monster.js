@@ -20,12 +20,23 @@ var Monster = function (game, x, y, monsterInfo) {
   this.player = this.game.state.getCurrentState().player;
   this.targetingPlayer = false;
 
+  this.health = 4;
+
+  this.isBeingKnockedBack = false;
+  this.knockbackTime = 200;
+  this.knockbackSpeed = 200;
+  this.knockbackVector = new Phaser.Point(0, 0);
+
   this.game.add.existing(this);
 };
 Monster.prototype = Object.create(Phaser.Sprite.prototype);
 Monster.prototype.constructor = Monster;
 
 Monster.prototype.update = function () {
+  if (this.isBeingKnockedBack === true) {
+    return;
+  }
+
   if (this.targetingPlayer === false) {
     if (this.position.distance(this.player.position) < monsterEntranceRange) {
       this.targetingPlayer = true;
@@ -38,7 +49,7 @@ Monster.prototype.update = function () {
       return;
     }
 
-    const playerAngle = this.position.angle(this.player.position);
+    const playerAngle = this.position.angle(new Phaser.Point(this.player.centerX, this.player.centerY));
     this.body.velocity.set(Math.cos(playerAngle), Math.sin(playerAngle));
     this.body.velocity.multiply(monsterWalkSpeed, monsterWalkSpeed);
   }

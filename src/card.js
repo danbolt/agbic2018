@@ -43,12 +43,25 @@ var StrikeCard = function(game, speed, timeMoving, cost, callbackContext) {
       onComplete();
     }, this);
   }, callbackContext, cost);
+
+  this.speed = speed;
 };
 StrikeCard.prototype = Object.create(Card.prototype);
 StrikeCard.prototype.tick = function () {
   let monsterInFront = this.isMonsterInFrontOfPlayer();
-  if (monsterInFront !== null) {
-    monsterInFront.kill();
+  if ((monsterInFront !== null) && (monsterInFront.isBeingKnockedBack === false)) {
+    monsterInFront.damage(1);
+
+    let pointDelta = Phaser.Point.subtract(this.player.position, monsterInFront.position);
+    pointDelta.normalize();
+    monsterInFront.isBeingKnockedBack = true;
+      Phaser.Point.subtract(monsterInFront.position, this.player.position, monsterInFront.knockbackVector);
+      Phaser.Point.normalize(monsterInFront.knockbackVector, monsterInFront.knockbackVector);
+      monsterInFront.knockbackVector.multiply(monsterInFront.knockbackSpeed * 2, monsterInFront.knockbackSpeed * 2);
+      monsterInFront.body.velocity.set(monsterInFront.knockbackVector.x, monsterInFront.knockbackVector.y);
+    this.game.time.events.add(monsterInFront.knockbackTime, () => {
+      monsterInFront.isBeingKnockedBack = false;
+    });
   }
 };
 
