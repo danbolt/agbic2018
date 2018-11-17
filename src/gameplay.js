@@ -50,6 +50,9 @@ Gameplay.prototype.create = function() {
   map.setCollisionByExclusion([0], true, this.foreground);
   this.game.physics.enable(this.foreground, Phaser.Physics.ARCADE);
 
+  var playerData = map.objects.etc.find((obj) => { return obj.type === 'player'; });
+  this.player.position.set(playerData.x, playerData.y);
+
   this.monsters = this.game.add.group();
   if (map.objects.monsters) {
     map.objects.monsters.forEach(function (monster) {
